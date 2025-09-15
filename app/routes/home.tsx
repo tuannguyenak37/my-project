@@ -1,7 +1,6 @@
 import type { Route } from "./+types/home";
 import { Provider } from "react-redux";
 import HomePage from "./../src/components/page/HomePage.jsx";
-import store from "../src/redux/store/store.js";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -10,9 +9,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return (
-    <Provider store={store}>
-      <HomePage />
-    </Provider>
-  );
+  return <HomePage />;
 }

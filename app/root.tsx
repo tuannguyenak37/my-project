@@ -6,6 +6,8 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { Provider } from "react-redux";
+import store from "./src/redux/store/store.js"; // ✅ default import
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -23,6 +25,7 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+// Layout để SSR HTML
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -41,10 +44,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// 🔹 App root bọc Redux Provider
 export default function App() {
-  return <Outlet />;
+  return (
+    <Provider store={store}>
+      <Outlet />
+    </Provider>
+  );
 }
 
+// Error boundary
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";

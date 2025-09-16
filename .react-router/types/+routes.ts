@@ -27,8 +27,8 @@ type RouteFiles = {
     id: "routes/home";
     page: "/";
   };
-  "../app/src/components/page/LoginPage.jsx": {
-    id: "../app/src/components/page/LoginPage";
+  "./src/components/page/LoginPage.jsx": {
+    id: "src/components/page/LoginPage";
     page: "/login";
   };
 };

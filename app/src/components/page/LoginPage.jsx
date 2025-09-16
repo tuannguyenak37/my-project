@@ -35,15 +35,15 @@ const Form = () => {
       const res = await APIUser.loginApi(data);
       dispatch(
         loginSuccess({
-          user: res.data.user,
-          token: res.data.access_Token,
+          user: res.data.data.user,
+          token: res.data.data.access_Token,
         })
       );
-
+      console.log("Logged in user:", res);
       // lưu token vào localStorage
+      localStorage.setItem("user", JSON.stringify(res.data.data.user));
       localStorage.setItem("token", res.data.data.access_Token);
 
-      console.log("Logged in user:", res);
       navigate("/"); // điều hướng sau login
 
       setLoading(false);

@@ -1,17 +1,19 @@
 import {
-  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-} from "react-router";
+  isRouteErrorResponse,
+} from "react-router"; // ✅ ĐÚNG cho React Router v7 runtime
+
 import { Provider } from "react-redux";
-import store from "./src/redux/store/store.js"; // ✅ default import
+import store from "./src/redux/store/store.js";
 
 import type { Route } from "./+types/root";
 import "./app.css";
 
+// 🔹 Khai báo link <head>
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -21,11 +23,11 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap",
   },
 ];
 
-// Layout để SSR HTML
+// 🔹 Layout SSR (server render HTML wrapper)
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -44,7 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-// 🔹 App root bọc Redux Provider
+// 🔹 Root component bọc Redux Provider
 export default function App() {
   return (
     <Provider store={store}>
@@ -53,7 +55,7 @@ export default function App() {
   );
 }
 
-// Error boundary
+// 🔹 Error boundary cho toàn app
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";

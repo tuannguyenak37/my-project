@@ -1,0 +1,284 @@
+{
+  "name": "app",
+  "path": "d:\\web\\my-project\\app",
+  "type": "directory",
+  "children": [
+    {
+      "name": "routes",
+      "type": "directory",
+      "path": "d:\\web\\my-project\\app\\routes",
+      "children": [
+        {
+          "name": "home.tsx",
+          "type": "file",
+          "path": "d:\\web\\my-project\\app\\routes\\home.tsx",
+          "icon": "📄"
+        }
+      ],
+      "icon": "📁"
+    },
+    {
+      "name": "src",
+      "type": "directory",
+      "path": "d:\\web\\my-project\\app\\src",
+      "children": [
+        {
+          "name": "components",
+          "type": "directory",
+          "path": "d:\\web\\my-project\\app\\src\\components",
+          "children": [
+            {
+              "name": "layout",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\components\\layout",
+              "children": [
+                {
+                  "name": "Baner.jsx",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\components\\layout\\Baner.jsx",
+                  "icon": "📄"
+                },
+                {
+                  "name": "nagigate.jsx",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\components\\layout\\nagigate.jsx",
+                  "icon": "📄"
+                }
+              ],
+              "icon": "📁"
+            },
+            {
+              "name": "page",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\components\\page",
+              "children": [
+                {
+                  "name": "HomePage.jsx",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\components\\page\\HomePage.jsx",
+                  "icon": "📄"
+                },
+                {
+                  "name": "LoginPage.jsx",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\components\\page\\LoginPage.jsx",
+                  "icon": "📄"
+                }
+              ],
+              "icon": "📁"
+            },
+            {
+              "name": "shared",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\components\\shared",
+              "children": [
+                {
+                  "name": ".gitkeep",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\components\\shared\\.gitkeep",
+                  "icon": "📄"
+                }
+              ],
+              "icon": "📁"
+            },
+            {
+              "name": "ui",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\components\\ui",
+              "children": [
+                {
+                  "name": ".gitkeep",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\components\\ui\\.gitkeep",
+                  "icon": "📄"
+                }
+              ],
+              "icon": "📁"
+            }
+          ],
+          "icon": "📁"
+        },
+        {
+          "name": "redux",
+          "type": "directory",
+          "path": "d:\\web\\my-project\\app\\src\\redux",
+          "children": [
+            {
+              "name": "slices",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\redux\\slices",
+              "children": [
+                {
+                  "name": "User_data.js",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\redux\\slices\\User_data.js",
+                  "icon": "📄"
+                },
+                {
+                  "name": "counterSlice.js",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\redux\\slices\\counterSlice.js",
+                  "icon": "📄"
+                }
+              ],
+              "icon": "📁"
+            },
+            {
+              "name": "store",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\redux\\store",
+              "children": [
+                {
+                  "name": "store.js",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\redux\\store\\store.js",
+                  "icon": "📄"
+                }
+              ],
+              "icon": "📁"
+            }
+          ],
+          "icon": "📁"
+        },
+        {
+          "name": "style",
+          "type": "directory",
+          "path": "d:\\web\\my-project\\app\\src\\style",
+          "children": [
+            {
+              "name": "audio",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\style\\audio",
+              "children": [],
+              "icon": "📁"
+            },
+            {
+              "name": "css",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\style\\css",
+              "children": [
+                {
+                  "name": "HomePage.css",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\style\\css\\HomePage.css",
+                  "icon": "🎨"
+                }
+              ],
+              "icon": "📁"
+            },
+            {
+              "name": "img",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\style\\img",
+              "children": [
+                {
+                  "name": "banhkemhoa.jpg",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\style\\img\\banhkemhoa.jpg",
+                  "icon": "🖼️"
+                },
+                {
+                  "name": "hoahuongduongcanh.jpg",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\style\\img\\hoahuongduongcanh.jpg",
+                  "icon": "🖼️"
+                },
+                {
+                  "name": "vittrang.jpg",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\style\\img\\vittrang.jpg",
+                  "icon": "🖼️"
+                }
+              ],
+              "icon": "📁"
+            }
+          ],
+          "icon": "📁"
+        },
+        {
+          "name": "utils",
+          "type": "directory",
+          "path": "d:\\web\\my-project\\app\\src\\utils",
+          "children": [
+            {
+              "name": "API",
+              "type": "directory",
+              "path": "d:\\web\\my-project\\app\\src\\utils\\API",
+              "children": [
+                {
+                  "name": "Login.js",
+                  "type": "file",
+                  "path": "d:\\web\\my-project\\app\\src\\utils\\API\\Login.js",
+                  "icon": "📄"
+                }
+              ],
+              "icon": "📁"
+            },
+            {
+              "name": ".gitkeep",
+              "type": "file",
+              "path": "d:\\web\\my-project\\app\\src\\utils\\.gitkeep",
+              "icon": "📄"
+            },
+            {
+              "name": "AxiosConfig.js",
+              "type": "file",
+              "path": "d:\\web\\my-project\\app\\src\\utils\\AxiosConfig.js",
+              "icon": "📄"
+            }
+          ],
+          "icon": "📁"
+        }
+      ],
+      "icon": "📁"
+    },
+    {
+      "name": "welcome",
+      "type": "directory",
+      "path": "d:\\web\\my-project\\app\\welcome",
+      "children": [
+        {
+          "name": "logo-dark.svg",
+          "type": "file",
+          "path": "d:\\web\\my-project\\app\\welcome\\logo-dark.svg",
+          "icon": "🖼️"
+        },
+        {
+          "name": "logo-light.svg",
+          "type": "file",
+          "path": "d:\\web\\my-project\\app\\welcome\\logo-light.svg",
+          "icon": "🖼️"
+        }
+      ],
+      "icon": "📁"
+    },
+    {
+      "name": "app.css",
+      "type": "file",
+      "path": "d:\\web\\my-project\\app\\app.css",
+      "icon": "🎨"
+    },
+    {
+      "name": "declarations.d.ts",
+      "type": "file",
+      "path": "d:\\web\\my-project\\app\\declarations.d.ts",
+      "icon": "📄"
+    },
+    {
+      "name": "root.tsx",
+      "type": "file",
+      "path": "d:\\web\\my-project\\app\\root.tsx",
+      "icon": "📄"
+    },
+    {
+      "name": "routes.ts",
+      "type": "file",
+      "path": "d:\\web\\my-project\\app\\routes.ts",
+      "icon": "📄"
+    }
+  ],
+  "generated": "2025-09-18T02:22:54.552Z",
+  "generator": "FileTree Pro Extension",
+  "note": "Common build folders, dependencies, and temporary files are automatically excluded.",
+  "showIcons": true
+}

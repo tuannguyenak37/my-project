@@ -1,4 +1,3 @@
-import { data } from "react-router";
 import axios from "../AxiosConfig.js";
 const loginApi = async (data) => {
   const URL_API = "/Login";

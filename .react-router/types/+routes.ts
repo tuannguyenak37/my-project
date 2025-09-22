@@ -16,12 +16,21 @@ type Pages = {
   "/login": {
     params: {};
   };
+  "/dashboard": {
+    params: {};
+  };
+  "/sanpham": {
+    params: {};
+  };
+  "/kho": {
+    params: {};
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login";
+    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho";
   };
   "routes/home.tsx": {
     id: "routes/home";
@@ -30,5 +39,17 @@ type RouteFiles = {
   "./src/components/page/LoginPage.jsx": {
     id: "src/components/page/LoginPage";
     page: "/login";
+  };
+  "./src/components/page/Dashborad.jsx": {
+    id: "src/components/page/Dashborad";
+    page: "/dashboard";
+  };
+  "./src/components/page/admin/Sanpham.jsx": {
+    id: "src/components/page/admin/Sanpham";
+    page: "/sanpham";
+  };
+  "./src/components/page/admin/Kho.jsx": {
+    id: "src/components/page/admin/Kho";
+    page: "/kho";
   };
 };

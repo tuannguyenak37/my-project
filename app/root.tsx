@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Links,
   Meta,
@@ -5,11 +6,9 @@ import {
   Scripts,
   ScrollRestoration,
   isRouteErrorResponse,
-} from "react-router"; // ✅ ĐÚNG cho React Router v7 runtime
-
+} from "react-router";
 import { Provider } from "react-redux";
 import store from "./src/redux/store/store.js";
-
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -46,11 +45,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// 🔹 ClientOnly component để tránh hydration mismatch
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null; // SSR không render gì
+  return <>{children}</>;
+}
+
 // 🔹 Root component bọc Redux Provider
 export default function App() {
   return (
     <Provider store={store}>
-      <Outlet />
+      <ClientOnly>
+        <Outlet />
+      </ClientOnly>
     </Provider>
   );
 }

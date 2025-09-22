@@ -1,6 +1,6 @@
 // src/utils/axiosInstance.js
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:7677/api", // đổi theo backend của bạn
@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 // interceptor cho request
 axiosInstance.interceptors.request.use(
   async (config) => {
-    let token = localStorage.getItem("accessToken");
+    let token = localStorage.getItem("token");
 
     if (token) {
       // giải mã token để check hạn
@@ -30,7 +30,7 @@ axiosInstance.interceptors.request.use(
             });
 
             token = res.data.accessToken;
-            localStorage.setItem("accessToken", token);
+            localStorage.setItem("token", token);
           } catch (err) {
             console.error("Refresh token cũng hết hạn → buộc login lại");
             localStorage.clear();

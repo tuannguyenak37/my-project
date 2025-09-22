@@ -136,7 +136,7 @@ const Form = () => {
                 name="password"
                 rules={{
                   required: "Vui lòng nhập mật khẩu",
-                  minLength: { value: 8, message: "Ít nhất 8 ký tự" },
+                  minLength: { value: 1, message: "Ít nhất 8 ký tự" },
                 }}
                 error={errors.password}
               />

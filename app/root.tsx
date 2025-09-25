@@ -8,6 +8,8 @@ import {
   isRouteErrorResponse,
 } from "react-router";
 import { Provider } from "react-redux";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import store from "./src/redux/store/store.js";
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -26,7 +28,7 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-// 🔹 Layout SSR (server render HTML wrapper)
+// 🔹 Layout SSR
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -45,26 +47,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-// 🔹 ClientOnly component để tránh hydration mismatch
+// 🔹 ClientOnly tránh hydration mismatch
 function ClientOnly({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  if (!mounted) return null; // SSR không render gì
+  if (!mounted) return null;
   return <>{children}</>;
 }
 
-// 🔹 Root component bọc Redux Provider
+// 🔹 Root component
 export default function App() {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <Provider store={store}>
-      <ClientOnly>
-        <Outlet />
-      </ClientOnly>
+      <QueryClientProvider client={queryClient}>
+        <ClientOnly>
+          <Outlet />
+        </ClientOnly>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </Provider>
   );
 }
 
-// 🔹 Error boundary cho toàn app
+// 🔹 Error boundary
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";
@@ -82,11 +89,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
+    <main className="p-4">
+      <h1 className="text-xl font-bold">{message}</h1>
       <p>{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre className="w-full p-4 overflow-x-auto bg-gray-100 text-sm">
           <code>{stack}</code>
         </pre>
       )}

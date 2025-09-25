@@ -3,7 +3,6 @@ import Nagiveadmin from "./nagiveadmin";
 import { useForm } from "react-hook-form";
 import axios from "../../../utils/API/sanpham.js";
 import { useEffect } from "react";
-import { div } from "framer-motion/client";
 
 export default function Sanpham() {
   const [is_addSP, setIs_addSP] = useState(false);
@@ -61,7 +60,7 @@ export default function Sanpham() {
       <Nagiveadmin />
 
       {/* Content chính */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 mt-2.5">
         <div className="flex gap-2 mb-4 justify-center">
           <input
             type="text"

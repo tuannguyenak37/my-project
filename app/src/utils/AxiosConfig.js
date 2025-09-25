@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:7677/api", // đổi theo backend của bạn
-  timeout: 5000,
+  timeout: 10000,
 });
 
 // interceptor cho request

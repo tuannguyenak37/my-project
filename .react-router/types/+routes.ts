@@ -25,12 +25,17 @@ type Pages = {
   "/kho": {
     params: {};
   };
+  "/product/:id": {
+    params: {
+      "id": string;
+    };
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho";
+    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho" | "/product/:id";
   };
   "routes/home.tsx": {
     id: "routes/home";
@@ -51,5 +56,9 @@ type RouteFiles = {
   "./src/components/page/admin/Kho.jsx": {
     id: "src/components/page/admin/Kho";
     page: "/kho";
+  };
+  "./src/components/page/ProductDetail.jsx": {
+    id: "src/components/page/ProductDetail";
+    page: "/product/:id";
   };
 };

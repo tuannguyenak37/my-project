@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import Nagiveadmin from "./nagiveadmin";
 import { useForm } from "react-hook-form";
-import axios from "../../../utils/API/sanpham.js";
+import axios from "../../../utils/API/kho.js";
 import { useEffect } from "react";
-
+import APIADDSP from "../../../utils/API/sanpham.js";
 export default function Sanpham() {
   const [is_addSP, setIs_addSP] = useState(false);
   const [kho, setKho] = useState([]); // ← lưu mảng kho
+  const [url_sanpham, setUrlsanpham] = useState(null);
 
   const {
     register,
@@ -17,8 +18,17 @@ export default function Sanpham() {
 
   const handel_addSP = async (data) => {
     console.log("Dữ liệu sản phẩm:", data);
+
+    const formData = new FormData();
+    formData.append("url_sanpham", url_sanpham); // 🔑 trùng với upload.single("image")
+    formData.append("ten_sanpham", data.ten_sanpham);
+    formData.append("gia_ban", data.gia_ban);
+    formData.append("mo_ta", data.mo_ta || "");
+    formData.append("so_luong_ton", data.so_luong_ton);
+    formData.append("kho_id", data.kho_id);
     try {
-      const response = await axios.addSP(data);
+      const response = await APIADDSP.addSP(formData);
+      console.log("Success:", url_sanpham);
       console.log("Success:", response.data);
     } catch (error) {
       if (error.response) {
@@ -41,7 +51,7 @@ export default function Sanpham() {
   useEffect(() => {
     const xemkho = async () => {
       try {
-        const res = await axios.xemkho();
+        const res = await axios.xemthongtinkho();
         setKho(res.data.data); // ← set vào state
         console.log(">>>", res.data.data);
       } catch (error) {
@@ -123,6 +133,12 @@ export default function Sanpham() {
               {errors.so_luong_ton && (
                 <p className="text-red-500 text-sm">Số lượng hợp lệ bắt buộc</p>
               )}
+              <input
+                type="file"
+                {...register("url_sanpham")} // hoặc không dùng react-hook-form cho file
+                onChange={(e) => setUrlsanpham(e.target.files[0])}
+                className="w-full border p-2 mb-2 rounded"
+              />
 
               <select {...register("kho_id", { required: true })}>
                 <option value="">Chọn kho</option>

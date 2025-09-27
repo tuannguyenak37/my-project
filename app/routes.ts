@@ -9,4 +9,5 @@ export default [
   route("dashboard", "./src/components/page/Dashborad.jsx"),
   route("sanpham", "./src/components/page/admin/Sanpham.jsx"),
   route("kho", "./src/components/page/admin/Kho.jsx"),
+  route("/product/:id", "./src/components/page/ProductDetail.jsx"),
 ] satisfies RouteConfig;

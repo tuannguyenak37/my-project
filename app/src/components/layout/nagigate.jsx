@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, X, ShoppingCart, User } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-
+import fetchUserFromCookie from "../../redux/slices/userThunk.js";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -10,7 +10,9 @@ export default function Navbar() {
   const user = useSelector((state) => state.user.user);
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const dispatch = useDispatch();
-
+  useEffect(() => {
+    dispatch(fetchUserFromCookie()); // gọi /refresh-token
+  }, []);
   return (
     <nav className="bg-white shadow-md">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">

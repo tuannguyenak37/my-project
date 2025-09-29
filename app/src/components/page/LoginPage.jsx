@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import APIUser from "../../utils/API/Login.js";
 import { useNavigate } from "react-router";
 import { useSelector, useDispatch } from "react-redux";
-import { loginSuccess } from "../../redux/slices/User_data.js"; // ✅ named import
+import { loginSuccess } from "../../redux/slices/User_data.js";
 
 const Form = () => {
   const [loading, setLoading] = useState(false);
@@ -32,17 +32,16 @@ const Form = () => {
     try {
       setLoading(true);
 
-      const res = await APIUser.loginApi(data);
-      dispatch(
-        loginSuccess({
-          user: res.data.data.user,
-          token: res.data.data.access_Token,
-        })
-      );
-      console.log("Logged in user:", res);
-      // lưu token vào localStorage
-      localStorage.setItem("user", JSON.stringify(res.data.data.user));
-      localStorage.setItem("token", res.data.data.access_Token);
+      const response = await APIUser.loginApi(data); // gọi API login
+      if (response.data.status) {
+        const user = response.data.data.user;
+        const accessToken = response.data.data.access_Token;
+        console.log(user); // null nếu render trước khi dispatch
+        // lưu vào redux
+        dispatch(loginSuccess({ user, accessToken }));
+      }
+
+      localStorage.setItem("token", response.data.data.access_Token);
 
       navigate("/"); // điều hướng sau login
 
@@ -58,7 +57,7 @@ const Form = () => {
   const handleSubmit_Register = async (data) => {
     try {
       setLoading(true);
-      console.log("Register data:", data);
+
       await APIUser.Create_User(data);
       setLoading(false);
 

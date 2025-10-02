@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Menu, X, ShoppingCart, User } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import fetchUserFromCookie from "../../redux/slices/userThunk.js";
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const cartCount = 2;
+
+  const cartItems = useSelector((state) => state.cart.items);
+  const cartCount = cartItems.length;
+  console.log(">>>>>", cartCount);
 
   const user = useSelector((state) => state.user.user);
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);

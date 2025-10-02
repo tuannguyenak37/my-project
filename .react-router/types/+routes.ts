@@ -30,12 +30,15 @@ type Pages = {
       "id": string;
     };
   };
+  "/shop": {
+    params: {};
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho" | "/product/:id";
+    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho" | "/product/:id" | "/shop";
   };
   "routes/home.tsx": {
     id: "routes/home";
@@ -60,5 +63,9 @@ type RouteFiles = {
   "./src/components/page/ProductDetail.jsx": {
     id: "src/components/page/ProductDetail";
     page: "/product/:id";
+  };
+  "./src/components/layout/CrateShop.jsx": {
+    id: "src/components/layout/CrateShop";
+    page: "/shop";
   };
 };

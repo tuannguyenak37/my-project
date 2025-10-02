@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 import {
   Links,
   Meta,
@@ -64,6 +65,30 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <ClientOnly>
           <Outlet />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: "#333",
+                color: "#fff",
+                borderRadius: "12px",
+                padding: "12px 20px",
+                fontSize: "15px",
+              },
+              success: {
+                style: {
+                  background: "#4caf50",
+                },
+              },
+              error: {
+                icon: "⚠️",
+                style: {
+                  background: "#f44336",
+                },
+              },
+            }}
+          />
         </ClientOnly>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

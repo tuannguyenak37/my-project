@@ -13,6 +13,11 @@ const SP_client = async () => {
   const URL_API = "/SP";
   return await axiosInstance.get(URL_API);
 };
+const xemCTSP = async (sanpham_id) => {
+  console.log(sanpham_id);
+  const URL_API = `/SPCT/${sanpham_id}`;
+  return await axiosInstance.get(URL_API);
+};
 
-const SP = { addSP, xemkho, SP_client };
+const SP = { addSP, xemkho, SP_client, xemCTSP };
 export default SP;

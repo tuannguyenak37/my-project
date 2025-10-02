@@ -26,6 +26,9 @@ export default function Sanpham() {
     formData.append("mo_ta", data.mo_ta || "");
     formData.append("so_luong_ton", data.so_luong_ton);
     formData.append("kho_id", data.kho_id);
+    formData.append("loai_sanpham", data.loai_sanpham); // loại sản phẩm
+    formData.append("nha_cung_cap", data.nha_cung_cap); // nhà cung cấp
+
     try {
       const response = await APIADDSP.addSP(formData);
       console.log("Success:", url_sanpham);
@@ -133,6 +136,32 @@ export default function Sanpham() {
               {errors.so_luong_ton && (
                 <p className="text-red-500 text-sm">Số lượng hợp lệ bắt buộc</p>
               )}
+              <select
+                {...register("loai_sanpham", { required: true })}
+                className="w-full border p-2 mb-2 rounded"
+              >
+                <option value="">Chọn loại sản phẩm</option>
+                <option value="dien_thoai">Điện thoại</option>
+                <option value="may_tinh">Máy tính</option>
+                <option value="phu_kien">Phụ kiện</option>
+                <option value="phu_kien">thời trang</option>
+              </select>
+              {errors.loai_sanpham && (
+                <p className="text-red-500 text-sm">
+                  Vui lòng chọn loại sản phẩm
+                </p>
+              )}
+              {/* Nhà cung cấp */}
+              <input
+                {...register("nha_cung_cap", { required: true })}
+                type="text"
+                placeholder="Nhà cung cấp"
+                className="w-full border p-2 mb-2 rounded"
+              />
+              {errors.nha_cung_cap && (
+                <p className="text-red-500 text-sm">Nhà cung cấp bắt buộc</p>
+              )}
+
               <input
                 type="file"
                 {...register("url_sanpham")} // hoặc không dùng react-hook-form cho file

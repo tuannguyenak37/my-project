@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Menu, X, ShoppingCart, User } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import fetchUserFromCookie from "../../redux/slices/userThunk.js";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,14 +54,14 @@ export default function Navbar() {
         {/* User + Cart + Hamburger */}
         <div className="flex items-center space-x-5 relative">
           {/* Giỏ hàng */}
-          <button className="relative">
+          <Link to="/cart" className="relative">
             <ShoppingCart size={22} />
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
                 {cartCount}
               </span>
             )}
-          </button>
+          </Link>
 
           {/* Tài khoản */}
           {isLoggedIn ? (

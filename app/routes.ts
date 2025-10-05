@@ -11,4 +11,6 @@ export default [
   route("kho", "./src/components/page/admin/Kho.jsx"),
   route("/product/:id", "./src/components/page/ProductDetail.jsx"),
   route("/shop", "./src/components/layout/CrateShop.jsx"),
+  route("/cart", "./src/components/page/Cart.jsx"),
+  route("/checkout", "./src/components/page/checkout.jsx"),
 ] satisfies RouteConfig;

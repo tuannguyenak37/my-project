@@ -33,12 +33,18 @@ type Pages = {
   "/shop": {
     params: {};
   };
+  "/cart": {
+    params: {};
+  };
+  "/checkout": {
+    params: {};
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho" | "/product/:id" | "/shop";
+    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho" | "/product/:id" | "/shop" | "/cart" | "/checkout";
   };
   "routes/home.tsx": {
     id: "routes/home";
@@ -67,5 +73,13 @@ type RouteFiles = {
   "./src/components/layout/CrateShop.jsx": {
     id: "src/components/layout/CrateShop";
     page: "/shop";
+  };
+  "./src/components/page/Cart.jsx": {
+    id: "src/components/page/Cart";
+    page: "/cart";
+  };
+  "./src/components/page/checkout.jsx": {
+    id: "src/components/page/checkout";
+    page: "/checkout";
   };
 };

@@ -95,6 +95,54 @@ export default function MalikethMall() {
           {/* Thêm nhiều sản phẩm bán chạy khác ở đây */}
         </div>
       </div>
+      <div className="shadow-lg rounded-2xl bg-white p-6 m-4 w-full">
+        {/* Phần giới thiệu */}
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-blue-600 mb-3">
+            Maliketh MALL ❤️sản phậm gợi ý cho bạn
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {" "}
+            không biết mua gì hãy thử xem nào ?
+          </p>
+          <button className="w-full md:w-auto bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700 transition">
+            Khám phá ngay
+          </button>
+        </div>
+
+        {/* Danh sách sản phẩm giảm giá */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {SP4.map((items) => (
+            <div
+              className="bg-gray-50 rounded-xl shadow-md p-3 text-center"
+              key={items.sanpham_id}
+            >
+              <h1 className="text-lg font-semibold text-red-500 mb-2">
+                💕 gọi ý cho bạn+
+              </h1>
+              <div className="aspect-[4/3] w-full bg-white rounded-2xl border border-gray-300 shadow-md flex items-center justify-center overflow-hidden">
+                <img
+                  src={items.url_sanpham}
+                  alt={items.ten_sanpham}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              <h2 className="text-base font-semibold text-gray-800">
+                {items.ten_sanpham}
+              </h2>
+              <p className="text-sm line-through text-gray-400">250.000đ</p>
+              <p className="text-lg font-bold text-red-600">{items.gia_ban}đ</p>
+              <Link
+                to={`/product/${items.sanpham_id}`}
+                className="mt-2 w-full bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600 transition"
+              >
+                Mua ngay
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

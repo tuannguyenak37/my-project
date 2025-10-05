@@ -26,6 +26,16 @@ export default function NagiveAdmin() {
             </li>
             <li>
               <NavLink
+                to="/notifications"
+                className={({ isActive }) =>
+                  `block p-2 rounded ${isActive ? "bg-gray-800 text-white" : "hover:bg-gray-200"}`
+                }
+              >
+                Đơn hàng
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
                 to="/Sanpham"
                 className={({ isActive }) =>
                   `block p-2 rounded ${isActive ? "bg-gray-800 text-white" : "hover:bg-gray-200"}`
@@ -45,16 +55,6 @@ export default function NagiveAdmin() {
                 <span>
                   <InboxOutlined style={{ fontSize: "24px" }} />
                 </span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/notifications"
-                className={({ isActive }) =>
-                  `block p-2 rounded ${isActive ? "bg-gray-800 text-white" : "hover:bg-gray-200"}`
-                }
-              >
-                Notifications
               </NavLink>
             </li>
           </ul>

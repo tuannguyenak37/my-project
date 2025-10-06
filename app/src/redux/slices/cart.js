@@ -1,7 +1,7 @@
 // src/redux/slices/cartSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
-// helper để load từ localStorage an toàn
+// Helper load từ localStorage an toàn
 const loadCart = () => {
   if (typeof window !== "undefined" && localStorage.getItem("cart")) {
     try {
@@ -35,8 +35,13 @@ const cartSlice = createSlice({
 
       if (index >= 0) {
         state.items[index].so_luong += product.so_luong || 1;
+        state.items[index].selected = false; // mặc định chưa chọn
       } else {
-        state.items.push({ ...product, so_luong: product.so_luong || 1 });
+        state.items.push({
+          ...product,
+          so_luong: product.so_luong || 1,
+          selected: false, // mặc định chưa chọn
+        });
       }
 
       saveCart(state.items);
@@ -60,13 +65,35 @@ const cartSlice = createSlice({
       saveCart(state.items);
     },
 
+    toggleSelect: (state, action) => {
+      const index = state.items.findIndex(
+        (item) => item.sanpham_id === action.payload
+      );
+      if (index >= 0) {
+        state.items[index].selected = !state.items[index].selected;
+      }
+      saveCart(state.items);
+    },
+
     clearCart: (state) => {
       state.items = [];
+      saveCart(state.items);
+    },
+
+    clearPaidItems: (state) => {
+      state.items = state.items.filter((item) => !item.selected);
       saveCart(state.items);
     },
   },
 });
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart } =
-  cartSlice.actions;
+export const {
+  addToCart,
+  removeFromCart,
+  updateQuantity,
+  toggleSelect,
+  clearCart,
+  clearPaidItems,
+} = cartSlice.actions;
+
 export default cartSlice.reducer;

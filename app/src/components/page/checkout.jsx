@@ -1,23 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import chekoutAPI from "../../utils/API/checkout";
+import CustomerInfoForm from "../ui/checkout/CustomerInfoForm.jsx";
+import ProductList from "../ui/checkout/ProductList.jsx";
+import PaymentMethod from "../ui/checkout/PaymentMethod.jsx";
+import OrderSummary from "../ui/checkout/OrderSummary.jsx";
 
 const Checkout = () => {
-  const cartItems = useSelector((state) => state.cart.items);
+  const cartItems = useSelector((state) => state.cart.items || []);
+  const productsToCheckout = JSON.parse(
+    sessionStorage.getItem("productsToCheckout") || "[]"
+  );
 
-  const { register, handleSubmit, watch, setValue } = useForm({
-    defaultValues: {
-      fullName: "",
-      phone: "",
-      province: "",
-      district: "",
-      ward: "",
-      detailAddress: "",
-      note: "",
-      paymentMethod: "cod",
-    },
-  });
+  const { register, handleSubmit, watch, setValue, getValues, formState } =
+    useForm({
+      defaultValues: {
+        fullName: "",
+        phone: "",
+        province: "",
+        district: "",
+        ward: "",
+        detailAddress: "",
+        note: "",
+        paymentMethod: "cod",
+        shopNotes: {},
+      },
+    });
 
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -27,18 +41,18 @@ const Checkout = () => {
     shipping: 0,
     total: 0,
   });
+  const [perShopTotals, setPerShopTotals] = useState([]);
 
   const province = watch("province");
   const district = watch("district");
 
-  // Format tiền tệ
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
 
-  // Lấy danh sách tỉnh/thành khi load
+  // Fetch provinces
   useEffect(() => {
     axios
       .get("https://provinces.open-api.vn/api/p/")
@@ -46,76 +60,119 @@ const Checkout = () => {
       .catch((err) => console.error(err));
   }, []);
 
-  // Lấy quận/huyện khi chọn tỉnh
+  // Fetch districts
   useEffect(() => {
     if (!province) return;
+
     axios
       .get(`https://provinces.open-api.vn/api/p/${province}?depth=2`)
-      .then((res) => setDistricts(res.data.districts || []));
-    setValue("district", "");
-    setValue("ward", "");
-    setWards([]);
-  }, [province]);
+      .then((res) => {
+        setDistricts(res.data.districts || []);
+        setWards([]);
+        setValue("district", "");
+        setValue("ward", "");
+      })
+      .catch(() => setDistricts([]));
+  }, [province, setValue]);
 
-  // Lấy phường/xã khi chọn huyện
+  // Fetch wards
   useEffect(() => {
     if (!district) return;
+
     axios
       .get(`https://provinces.open-api.vn/api/d/${district}?depth=2`)
-      .then((res) => setWards(res.data.wards || []));
-    setValue("ward", "");
-  }, [district]);
+      .then((res) => {
+        setWards(res.data.wards || []);
+        setValue("ward", "");
+      })
+      .catch(() => setWards([]));
+  }, [district, setValue]);
 
-  // Nhóm sản phẩm theo shop
-  const groupByShop = (items) => {
+  // Group products by shop
+  const groupedItems = useMemo(() => {
     const grouped = {};
-    items.forEach((item) => {
+    productsToCheckout.forEach((item) => {
       const shopId = item.shop_id || "unknown";
-      if (!grouped[shopId]) {
+      if (!grouped[shopId])
         grouped[shopId] = {
           ten_shop: item.ten_shop || "Shop không xác định",
           items: [],
         };
-      }
       grouped[shopId].items.push(item);
     });
     return grouped;
-  };
+  }, [productsToCheckout]);
 
-  // Cập nhật tổng tiền
+  // Calculate totals
   useEffect(() => {
-    const subtotal = cartItems.reduce(
-      (sum, item) => sum + item.gia_ban * item.so_luong,
-      0
-    );
-    const uniqueShops = [...new Set(cartItems.map((i) => i.shop_id))];
-    const shipping = uniqueShops.length * 30000;
-    const total = subtotal + shipping;
-    setSummary({ subtotal, shipping, total });
-  }, [cartItems]);
+    if (!Object.keys(groupedItems).length) return;
 
-  // Xử lý đặt hàng
-  const onSubmit = (data) => {
-    if (!data.fullName || !data.phone || !data.detailAddress) {
-      alert("Vui lòng nhập đầy đủ thông tin giao hàng!");
-      return;
-    }
+    const perShop = Object.entries(groupedItems).map(([shopId, shop]) => {
+      const subtotal = shop.items.reduce(
+        (s, it) => s + Number(it.gia_ban || 0) * Number(it.so_luong || 0),
+        0
+      );
+      const shipping = subtotal > 0 ? 30000 : 0;
+      return {
+        shopId,
+        ten_shop: shop.ten_shop,
+        subtotal,
+        shipping,
+        total: subtotal + shipping,
+      };
+    });
+
+    const subtotal = perShop.reduce((s, p) => s + p.subtotal, 0);
+    const shipping = perShop.reduce((s, p) => s + p.shipping, 0);
+    const total = perShop.reduce((s, p) => s + p.total, 0);
+    const newSummary = { subtotal, shipping, total };
+
+    if (JSON.stringify(perShopTotals) !== JSON.stringify(perShop))
+      setPerShopTotals(perShop);
+    if (JSON.stringify(summary) !== JSON.stringify(newSummary))
+      setSummary(newSummary);
+  }, [groupedItems]);
+
+  const { mutate: checkout, isPending } = useMutation({
+    mutationFn: (data) => chekoutAPI.chekout_pay(data),
+    onSuccess: () => toast.success("✅ Thanh toán thành công!"),
+    onError: (error) => {
+      toast.error("❌ Có lỗi xảy ra khi thanh toán!");
+      console.error("❌ Lỗi :", error);
+    },
+  });
+
+  const onSubmit = (values) => {
+    const shopsPayload = perShopTotals.map((p) => ({
+      shop_id: p.shopId,
+      ten_shop: p.ten_shop,
+      items: groupedItems[p.shopId]?.items || [],
+      note: (values.shopNotes && values.shopNotes[p.shopId]) || "",
+      subtotal: p.subtotal,
+      shipping: p.shipping,
+      total: p.total,
+    }));
 
     const orderData = {
-      ...data,
-      items: cartItems,
+      customer: {
+        fullName: values.fullName,
+        phone: values.phone,
+        province: values.province,
+        district: values.district,
+        ward: values.ward,
+        detailAddress: values.detailAddress,
+      },
+      paymentMethod: values.paymentMethod,
+      shops: shopsPayload,
       total: summary.total,
     };
 
-    console.log("Dữ liệu đơn hàng:", orderData);
-    alert("Đặt hàng thành công! Cảm ơn bạn đã mua hàng.");
+    checkout(orderData);
+    console.log("🧾 Dữ liệu đơn hàng gửi lên API:", orderData);
   };
-
-  const groupedItems = groupByShop(cartItems);
 
   return (
     <div className="container mx-auto p-4 max-w-5xl bg-gray-100 min-h-screen">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4 bg-orange-500 p-4 rounded-sm">
         <h1 className="text-2xl font-bold text-white">Thanh Toán</h1>
         <a href="/cart" className="text-white hover:underline text-sm">
@@ -125,213 +182,29 @@ const Checkout = () => {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Form giao hàng + phương thức thanh toán */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white rounded-sm shadow-sm mb-4 p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Địa chỉ giao hàng
-              </h2>
-
-              {/* Họ tên + SĐT */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Họ và tên *
-                  </label>
-                  <input
-                    type="text"
-                    {...register("fullName")}
-                    className="border border-gray-300 rounded-sm px-3 py-2 w-full"
-                    placeholder="Nhập họ và tên"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Số điện thoại *
-                  </label>
-                  <input
-                    type="tel"
-                    {...register("phone")}
-                    className="border border-gray-300 rounded-sm px-3 py-2 w-full"
-                    placeholder="Nhập số điện thoại"
-                  />
-                </div>
-              </div>
-
-              {/* Chọn Tỉnh/Quận/Xã */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Tỉnh/Thành *
-                  </label>
-                  <select
-                    {...register("province")}
-                    className="border px-3 py-2 w-full"
-                  >
-                    <option value="">-- Chọn tỉnh/thành --</option>
-                    {provinces.map((p) => (
-                      <option key={p.code} value={p.code}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Quận/Huyện *
-                  </label>
-                  <select
-                    {...register("district")}
-                    className="border
-                     px-3 py-2 w-full"
-                  >
-                    <option value="">-- Chọn quận/huyện --</option>
-                    {districts.map((d) => (
-                      <option key={d.code} value={d.code}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Phường/Xã *
-                  </label>
-                  <select
-                    {...register("ward")}
-                    className="border px-3 py-2 w-full"
-                  >
-                    <option value="">-- Chọn phường/xã --</option>
-                    {wards.map((w) => (
-                      <option key={w.code} value={w.code}>
-                        {w.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Địa chỉ chi tiết */}
-              <div className="mb-4">
-                <label className="block text-sm font-semibold mb-2">
-                  Địa chỉ chi tiết *
-                </label>
-                <textarea
-                  rows="2"
-                  {...register("detailAddress")}
-                  className="border border-gray-300 rounded-sm px-3 py-2 w-full"
-                  placeholder="Số nhà, tên đường, tòa nhà..."
-                />
-              </div>
-
-              {/* Ghi chú */}
-              <div className="mb-4">
-                <label className="block text-sm font-semibold mb-2">
-                  Ghi chú
-                </label>
-                <textarea
-                  rows="2"
-                  {...register("note")}
-                  className="border border-gray-300 rounded-sm px-3 py-2 w-full"
-                  placeholder="Ghi chú cho đơn hàng (tùy chọn)"
-                />
-              </div>
-            </div>
-
-            {/* Sản phẩm */}
-            <div className="bg-white rounded-sm shadow-sm mb-4 p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Sản phẩm
-              </h2>
-              {Object.keys(groupedItems).map((shopId) => {
-                const shop = groupedItems[shopId];
-                return (
-                  <div key={shopId} className="border-t pt-4">
-                    <div className="mb-2 font-semibold">{shop.ten_shop}</div>
-                    {shop.items.map((item) => (
-                      <div
-                        key={item.sanpham_id}
-                        className="flex items-center mb-4"
-                      >
-                        <img
-                          src={item.url_sanpham}
-                          alt={item.ten_sanpham}
-                          className="w-16 h-16 object-cover mr-4"
-                        />
-                        <div className="flex-1">
-                          <p>{item.ten_sanpham}</p>
-                          <p className="text-sm text-gray-600">
-                            Số lượng: {item.so_luong}
-                          </p>
-                        </div>
-                        <p className="text-orange-500">
-                          {formatCurrency(item.gia_ban * item.so_luong)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Thanh toán */}
-            <div className="bg-white rounded-sm shadow-sm mb-4 p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Phương thức thanh toán
-              </h2>
-              <div className="space-y-3">
-                {[
-                  { id: "cod", label: "Thanh toán khi nhận hàng (COD)" },
-                  { id: "bank", label: "Chuyển khoản ngân hàng" },
-                  { id: "card", label: "Thẻ tín dụng/ghi nợ" },
-                ].map((method) => (
-                  <div key={method.id} className="flex items-center">
-                    <input
-                      type="radio"
-                      id={method.id}
-                      value={method.id}
-                      {...register("paymentMethod")}
-                      className="mr-2 h-4 w-4"
-                    />
-                    <label htmlFor={method.id}>{method.label}</label>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CustomerInfoForm
+              register={register}
+              setValue={setValue}
+              provinces={provinces}
+              districts={districts}
+              wards={wards}
+              formState={formState}
+            />
+            <ProductList
+              groupedItems={groupedItems}
+              formatCurrency={formatCurrency}
+              register={register}
+            />
+            <PaymentMethod register={register} />
           </div>
-
-          {/* Tóm tắt */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-sm shadow-sm p-6 sticky top-4">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Tóm tắt đơn hàng
-              </h2>
-              <div className="flex justify-between text-gray-600 mb-2">
-                <span>Tạm tính</span>
-                <span>{formatCurrency(summary.subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 mb-2">
-                <span>Phí vận chuyển</span>
-                <span>{formatCurrency(summary.shipping)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 mb-4">
-                <span>Giảm giá</span>
-                <span>0 ₫</span>
-              </div>
-              <div className="border-t my-4"></div>
-              <div className="flex justify-between text-lg font-semibold text-gray-800 mb-4">
-                <span>Tổng cộng</span>
-                <span className="text-orange-500">
-                  {formatCurrency(summary.total)}
-                </span>
-              </div>
-              <button
-                type="submit"
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 w-full rounded-sm transition duration-300"
-              >
-                Đặt hàng
-              </button>
-            </div>
+            <OrderSummary
+              summary={summary}
+              formatCurrency={formatCurrency}
+              perShopTotals={perShopTotals}
+              isPending={isPending}
+            />
           </div>
         </div>
       </form>

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import toast from "react-hot-toast";
 import {
   addToCart,
   removeFromCart,
   updateQuantity,
   clearCart,
+  toggleSelect,
 } from "../../redux/slices/cart.js";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
+  const navigate = useNavigate(); // ✅ chỉ được gọi trong function component
+
   const dispatch = useDispatch();
   const cart1 = useSelector((state) => state.cart.items);
 
@@ -93,13 +98,27 @@ const Cart = () => {
     const selectedProducts = cart1.filter((item) =>
       selectedItems.includes(item.sanpham_id)
     );
+    console.log(">>> sản phẩm", selectedProducts);
     if (selectedProducts.length === 0) {
-      alert("Vui lòng chọn sản phẩm muốn thanh toán!");
+      toast.error(" vui lòng chọn sản phẩm thanh toán");
       return;
     }
+    // for (let i = 0; i < selectedProducts.length; i++) {
+    //   dispatch(
+    //     toggleSelect({
+    //       sanpham_id: selectedProducts[i].sanpham_id,
+    //     })
+    //   );
+    // }
+    sessionStorage.setItem(
+      "productsToCheckout",
+      JSON.stringify(selectedProducts)
+    );
+
+    navigate("/checkout");
     console.log("Thanh toán với:", selectedProducts);
-    alert("Chuyển đến trang thanh toán với sản phẩm đã chọn!");
-    // navigate("/checkout", { state: { products: selectedProducts } });
+
+    navigate("/checkout");
   };
 
   const groupedItems = groupByShop(cart1);

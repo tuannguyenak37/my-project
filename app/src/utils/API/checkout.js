@@ -1,10 +1,6 @@
 import axiosInstance from "../AxiosConfig.js";
 
-const addKH = async () => {
-  const URL_API = "admin/xemthongtinkho";
 
-  return await axiosInstance.get(URL_API);
-};
 const chekout_pay = async (data) => {
   const URL_API = "/checkout";
 

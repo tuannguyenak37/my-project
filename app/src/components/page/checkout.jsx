@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { useSelector } from "react-redux";
-import axios from "axios";
+// Checkout.jsx
+import React, { useMemo, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -9,33 +8,22 @@ import "react-toastify/dist/ReactToastify.css";
 import chekoutAPI from "../../utils/API/checkout";
 import CustomerInfoForm from "../ui/checkout/CustomerInfoForm.jsx";
 import ProductList from "../ui/checkout/ProductList.jsx";
-import PaymentMethod from "../ui/checkout/PaymentMethod.jsx";
 import OrderSummary from "../ui/checkout/OrderSummary.jsx";
-
+import PaymentMethod from "../ui/checkout/PaymentMethod.jsx";
 const Checkout = () => {
-  const cartItems = useSelector((state) => state.cart.items || []);
-  const productsToCheckout = JSON.parse(
-    sessionStorage.getItem("productsToCheckout") || "[]"
+  const savedProducts = sessionStorage.getItem("productsToCheckout");
+  const productsToCheckout = useMemo(
+    () => (savedProducts ? JSON.parse(savedProducts) : []),
+    [savedProducts]
   );
 
-  const { register, handleSubmit, watch, setValue, getValues, formState } =
-    useForm({
-      defaultValues: {
-        fullName: "",
-        phone: "",
-        province: "",
-        district: "",
-        ward: "",
-        detailAddress: "",
-        note: "",
-        paymentMethod: "cod",
-        shopNotes: {},
-      },
-    });
+  const { handleSubmit, register, watch } = useForm({
+    defaultValues: {
+      shopNotes: {},
+    },
+  });
 
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [summary, setSummary] = useState({
     subtotal: 0,
     shipping: 0,
@@ -43,50 +31,11 @@ const Checkout = () => {
   });
   const [perShopTotals, setPerShopTotals] = useState([]);
 
-  const province = watch("province");
-  const district = watch("district");
-
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
-
-  // Fetch provinces
-  useEffect(() => {
-    axios
-      .get("https://provinces.open-api.vn/api/p/")
-      .then((res) => setProvinces(res.data))
-      .catch((err) => console.error(err));
-  }, []);
-
-  // Fetch districts
-  useEffect(() => {
-    if (!province) return;
-
-    axios
-      .get(`https://provinces.open-api.vn/api/p/${province}?depth=2`)
-      .then((res) => {
-        setDistricts(res.data.districts || []);
-        setWards([]);
-        setValue("district", "");
-        setValue("ward", "");
-      })
-      .catch(() => setDistricts([]));
-  }, [province, setValue]);
-
-  // Fetch wards
-  useEffect(() => {
-    if (!district) return;
-
-    axios
-      .get(`https://provinces.open-api.vn/api/d/${district}?depth=2`)
-      .then((res) => {
-        setWards(res.data.wards || []);
-        setValue("ward", "");
-      })
-      .catch(() => setWards([]));
-  }, [district, setValue]);
 
   // Group products by shop
   const groupedItems = useMemo(() => {
@@ -125,46 +74,45 @@ const Checkout = () => {
     const subtotal = perShop.reduce((s, p) => s + p.subtotal, 0);
     const shipping = perShop.reduce((s, p) => s + p.shipping, 0);
     const total = perShop.reduce((s, p) => s + p.total, 0);
-    const newSummary = { subtotal, shipping, total };
 
     if (JSON.stringify(perShopTotals) !== JSON.stringify(perShop))
       setPerShopTotals(perShop);
+    const newSummary = { subtotal, shipping, total };
     if (JSON.stringify(summary) !== JSON.stringify(newSummary))
       setSummary(newSummary);
   }, [groupedItems]);
 
   const { mutate: checkout, isPending } = useMutation({
     mutationFn: (data) => chekoutAPI.chekout_pay(data),
-    onSuccess: () => toast.success("✅ Thanh toán thành công!"),
+    onSuccess: () => toast.success("✅ Đặt hàng thành công!"),
     onError: (error) => {
-      toast.error("❌ Có lỗi xảy ra khi thanh toán!");
+      toast.error("❌ Có lỗi xảy ra khi đặt hàng!");
       console.error("❌ Lỗi :", error);
     },
   });
 
-  const onSubmit = (values) => {
-    const shopsPayload = perShopTotals.map((p) => ({
-      shop_id: p.shopId,
-      ten_shop: p.ten_shop,
-      items: groupedItems[p.shopId]?.items || [],
-      note: (values.shopNotes && values.shopNotes[p.shopId]) || "",
-      subtotal: p.subtotal,
-      shipping: p.shipping,
-      total: p.total,
-    }));
+  const onSubmit = (data) => {
+    if (!selectedAddress)
+      return toast.error("❌ Vui lòng chọn địa chỉ giao hàng");
+
+    console.log("💳 Phương thức thanh toán:", data.paymentMethod); // <-- đây nè!
+    const shopNotes = watch("shopNotes") || {};
+
+    const list_sanpham = perShopTotals.flatMap((p) => {
+      const items = groupedItems[p.shopId]?.items || [];
+      const ghiChuShop = shopNotes[p.shopId] || "";
+      return items.map((item) => ({
+        sanpham_id: item.sanpham_id,
+        so_luong: item.so_luong,
+        shop_id: p.shopId,
+        ghi_chu: ghiChuShop,
+      }));
+    });
 
     const orderData = {
-      customer: {
-        fullName: values.fullName,
-        phone: values.phone,
-        province: values.province,
-        district: values.district,
-        ward: values.ward,
-        detailAddress: values.detailAddress,
-      },
-      paymentMethod: values.paymentMethod,
-      shops: shopsPayload,
-      total: summary.total,
+      khachhang_id: selectedAddress.khachhang_id,
+      hinh_thuc_thanh_toan: data.paymentMethod,
+      list_sanpham,
     };
 
     checkout(orderData);
@@ -174,7 +122,7 @@ const Checkout = () => {
   return (
     <div className="container mx-auto p-4 max-w-5xl bg-gray-100 min-h-screen">
       <div className="flex items-center justify-between mb-4 bg-orange-500 p-4 rounded-sm">
-        <h1 className="text-2xl font-bold text-white">Thanh Toán</h1>
+        <h1 className="text-2xl font-bold text-white">Đặt Hàng</h1>
         <a href="/cart" className="text-white hover:underline text-sm">
           Quay lại giỏ hàng
         </a>
@@ -183,21 +131,14 @@ const Checkout = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <CustomerInfoForm
-              register={register}
-              setValue={setValue}
-              provinces={provinces}
-              districts={districts}
-              wards={wards}
-              formState={formState}
-            />
+            <CustomerInfoForm setValueParent={setSelectedAddress} />
             <ProductList
               groupedItems={groupedItems}
               formatCurrency={formatCurrency}
               register={register}
             />
-            <PaymentMethod register={register} />
           </div>
+          <PaymentMethod register={register} />
           <div className="lg:col-span-1">
             <OrderSummary
               summary={summary}

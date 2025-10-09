@@ -15,24 +15,10 @@ import store from "./src/redux/store/store.js";
 import type { Route } from "./+types/root";
 import "./app.css";
 
-// 🔹 Khai báo link <head>
-export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap",
-  },
-];
-
-// 🔹 Layout SSR
+// 🔹 Layout SSR (minimized whitespace to avoid hydration error)
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="mdl-js">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -48,12 +34,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-// 🔹 ClientOnly tránh hydration mismatch
+// 🔹 ClientOnly to avoid hydration mismatch
 function ClientOnly({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  return <>{children}</>;
+  return mounted ? <>{children}</> : null;
 }
 
 // 🔹 Root component
@@ -76,48 +61,44 @@ export default function App() {
                 padding: "12px 20px",
                 fontSize: "15px",
               },
-              success: {
-                style: {
-                  background: "#4caf50",
-                },
-              },
-              error: {
-                icon: "⚠️",
-                style: {
-                  background: "#f44336",
-                },
-              },
+              success: { style: { background: "#4caf50" } },
+              error: { icon: "⚠️", style: { background: "#f44336" } },
             }}
           />
         </ClientOnly>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </Provider>
   );
 }
 
-// 🔹 Error boundary
+// 🔹 Improved ErrorBoundary
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? "404" : `Error ${error.status}`;
     details =
       error.status === 404
         ? "The requested page could not be found."
         : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
+  } else if (error instanceof Error) {
+    message = "Client Error";
     details = error.message;
     stack = error.stack;
+    if (error.message.includes("Failed to fetch")) {
+      details =
+        "Failed to load a resource. Please check your network connection or try again later.";
+    }
   }
 
   return (
     <main className="p-4">
       <h1 className="text-xl font-bold">{message}</h1>
       <p>{details}</p>
-      {stack && (
+      {stack && import.meta.env.DEV && (
         <pre className="w-full p-4 overflow-x-auto bg-gray-100 text-sm">
           <code>{stack}</code>
         </pre>

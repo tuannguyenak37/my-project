@@ -13,4 +13,17 @@ export default [
   route("/shop", "./src/components/layout/CrateShop.jsx"),
   route("/cart", "./src/components/page/Cart.jsx"),
   route("/checkout", "./src/components/page/checkout.jsx"),
+  route("/security", "./src/components/ui/operating_policy/security.jsx"),
+  route(
+    "/MalikethPolicy",
+    "./src/components/ui/operating_policy/MalikethPolicy.jsx"
+  ),
+  route(
+    "/ReturnRefundPolicy",
+    "./src/components/ui/operating_policy/ReturnRefundPolicy.jsx"
+  ),
+  route(
+    "/TermsOfService",
+    "./src/components/ui/operating_policy/TermsOfService.jsx"
+  ),
 ] satisfies RouteConfig;

@@ -88,9 +88,15 @@ export default function Navbar() {
                   >
                     Đơn hàng của tôi
                   </a>
+                  <Link
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    to="/dashboard"
+                  >
+                    Shop của tôi
+                  </Link>
                   <button
                     onClick={() => dispatch(logout())}
-                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="w-full text-left px-4 py-2  hover:bg-gray-100 text-red-600"
                   >
                     Đăng xuất
                   </button>

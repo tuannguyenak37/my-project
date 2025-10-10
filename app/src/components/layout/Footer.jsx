@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <div className="mt-5">
@@ -21,16 +22,18 @@ export default function Footer() {
             <h3 className="text-lg font-semibold text-white mb-3">Thông tin</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li>
-                <Link to="#">Chính sách bảo mật</Link>
+                <Link to="/security">Chính sách bảo mật</Link>
               </li>
               <li>
-                <Link to="#">Quy chế hoạt động</Link>
+                <Link to="/MalikethPolicy">Quy chế hoạt động</Link>
               </li>
               <li>
-                <Link to="#">Chính sách trả hàng hoàn tiền</Link>
+                <Link to="/ReturnRefundPolicy">
+                  Chính sách trả hàng hoàn tiền
+                </Link>
               </li>
               <li>
-                <Link to="#">Điều khoản dịch vụ</Link>
+                <Link to="/TermsOfService">Điều khoản dịch vụ</Link>
               </li>
             </ul>
           </div>

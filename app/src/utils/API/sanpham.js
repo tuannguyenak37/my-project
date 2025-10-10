@@ -18,6 +18,10 @@ const xemCTSP = async (sanpham_id) => {
   const URL_API = `/SPCT/${sanpham_id}`;
   return await axiosInstance.get(URL_API);
 };
+const bestseller = async () => {
+  const URL_API = `/bestseller`;
+  return await axiosInstance.get(URL_API);
+};
 
-const SP = { addSP, xemkho, SP_client, xemCTSP };
+const SP = { addSP, xemkho, SP_client, xemCTSP, bestseller };
 export default SP;

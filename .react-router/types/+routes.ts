@@ -39,12 +39,24 @@ type Pages = {
   "/checkout": {
     params: {};
   };
+  "/security": {
+    params: {};
+  };
+  "/MalikethPolicy": {
+    params: {};
+  };
+  "/ReturnRefundPolicy": {
+    params: {};
+  };
+  "/TermsOfService": {
+    params: {};
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho" | "/product/:id" | "/shop" | "/cart" | "/checkout";
+    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho" | "/product/:id" | "/shop" | "/cart" | "/checkout" | "/security" | "/MalikethPolicy" | "/ReturnRefundPolicy" | "/TermsOfService";
   };
   "routes/home.tsx": {
     id: "routes/home";
@@ -81,5 +93,21 @@ type RouteFiles = {
   "./src/components/page/checkout.jsx": {
     id: "src/components/page/checkout";
     page: "/checkout";
+  };
+  "./src/components/ui/operating_policy/security.jsx": {
+    id: "src/components/ui/operating_policy/security";
+    page: "/security";
+  };
+  "./src/components/ui/operating_policy/MalikethPolicy.jsx": {
+    id: "src/components/ui/operating_policy/MalikethPolicy";
+    page: "/MalikethPolicy";
+  };
+  "./src/components/ui/operating_policy/ReturnRefundPolicy.jsx": {
+    id: "src/components/ui/operating_policy/ReturnRefundPolicy";
+    page: "/ReturnRefundPolicy";
+  };
+  "./src/components/ui/operating_policy/TermsOfService.jsx": {
+    id: "src/components/ui/operating_policy/TermsOfService";
+    page: "/TermsOfService";
   };
 };

@@ -4,7 +4,7 @@ import api_SP from "../../utils/API/sanpham.js";
 import { Link } from "react-router-dom";
 export default function MalikethMall() {
   const [SP4, setSP4] = useState([]);
-
+  const [bestseller4, setbestseller4] = useState([]);
   const { mutate: xem_SP } = useMutation({
     mutationFn: () => api_SP.SP_client(),
     onSuccess: (res) => {
@@ -14,10 +14,19 @@ export default function MalikethMall() {
       console.error("❌ Lỗi khi gọi API:", error);
     },
   });
-
+  const { mutate: bestseller } = useMutation({
+    mutationFn: () => api_SP.bestseller(),
+    onSuccess: (res) => {
+      setbestseller4(res.data.data);
+    },
+    onError: (error) => {
+      console.error("❌ Lỗi khi gọi API:", error);
+    },
+  });
   // Gọi API 1 lần khi component mount
   useEffect(() => {
     xem_SP();
+    bestseller();
   }, []);
 
   return (
@@ -72,29 +81,45 @@ export default function MalikethMall() {
       </div>
 
       {/* Block sản phẩm bán chạy */}
-      <div className="shadow-lg rounded-2xl bg-white mt-3.5 border border-gray-300 p-4">
-        <h1 className="text-2xl font-bold text-orange-500 mb-4">
-          Sản phẩm bán chạy hàng đầu 😘
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mt-5">
+        <h1 className="text-2xl font-bold text-orange-500 mb-6 text-center">
+          🏆 Sản phẩm bán chạy hàng đầu 😍
         </h1>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-gray-50 rounded-xl shadow-md p-3 text-center">
-            <img
-              src="https://via.placeholder.com/150"
-              alt="Sản phẩm giảm giá"
-              className="w-full h-28 object-cover rounded-lg mb-2"
-            />
-            <h2 className="text-base font-semibold text-gray-800">
-              Áo Thun Nam
-            </h2>
-            <p className="text-sm line-through text-gray-400">250.000đ</p>
-            <p className="text-lg font-bold text-red-600">199.000đ</p>
-            <button className="mt-2 w-full bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600 transition">
-              Mua ngay
-            </button>
-          </div>
-          {/* Thêm nhiều sản phẩm bán chạy khác ở đây */}
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {bestseller4.map((item) => (
+            <div
+              key={item.sanpham_id}
+              className="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 group"
+            >
+              <div className="relative w-full h-36 overflow-hidden">
+                <img
+                  src={item.url_sanpham}
+                  alt={item.ten_sanpham}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                  HOT 🔥
+                </div>
+              </div>
+
+              <div className="p-3 text-center">
+                <h2 className="text-base font-semibold text-gray-800 truncate">
+                  {item.ten_sanpham}
+                </h2>
+                <p className="text-lg font-bold text-red-600 mt-1">
+                  {item.gia_ban.toLocaleString()}₫
+                </p>
+
+                <button className="mt-3 w-full bg-orange-500 text-white py-1.5 px-3 rounded-xl font-medium hover:bg-orange-600 transition-colors duration-300">
+                  Mua ngay
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
+
       <div className="shadow-lg rounded-2xl bg-white p-6 m-4 w-full">
         {/* Phần giới thiệu */}
         <div className="mb-6">

@@ -3,6 +3,8 @@ import KhoAPI from "../../../utils/API/kho.js";
 import NagiveAdmin from "./nagiveadmin";
 import axios from "../../../utils/API/sanpham.js";
 import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
 
 export default function Kho() {
   const [sanpham, setSanpham] = useState([]);
@@ -14,13 +16,33 @@ export default function Kho() {
   const [thongtinkho, setThongTinKho] = useState([]); // danh sách kho
   const [soluongNhap, setSoluongNhap] = useState({}); // { sanpham_id: so_luong }
   const [nha_cung_cap, setnha_cung_cap] = useState("");
-
+  const [isnewkho, setisnewkho] = useState(false);
   // state lọc sản phẩm
   const [search, setSearch] = useState("");
   const [khoList, setKhoList] = useState([]);
   const [selectedKho, setSelectedKho] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const { register, handleSubmit, reset } = useForm();
+  // thêm kho mới
+  const mutationNewKho = useMutation({
+    mutationFn: (data) => KhoAPI.newkho(data),
+    onSuccess: () => {
+      console.log("✅ thành công");
+      setisnewkho(false);
+      toast.success("Thêm kho mới thành công ✅");
+    },
+    onError: (error) => {
+      console.error("❌ Lỗi ", error);
+      toast.error("Lỗi thêm kho, vui lòng thử lại sau");
+    },
+  });
+  // Lấy mutate và isLoading trực tiếp
+  const { mutate: newkho, isLoading: isloadingkho } = mutationNewKho;
+  const onSubmit = (data) => {
+    console.log("Dữ liệu form:", data);
+    newkho(data); // mutation chạy -> isloadingkho tự true
+  };
 
   // Load dữ liệu sản phẩm
   useEffect(() => {
@@ -59,7 +81,9 @@ export default function Kho() {
     setSelectKho(item.kho_id);
     setIsChonKho(true);
   };
-
+  const handlenewkho = (e) => {
+    setisnewkho(true);
+  };
   // Lọc dữ liệu sản phẩm
   const filteredSP = sanpham.filter((item) => {
     const matchName = search
@@ -73,7 +97,7 @@ export default function Kho() {
   });
 
   // Nhập kho mutation
-  const { mutate: nhapKho, isPending } = useMutation({
+  const { mutate: nhapKho, isLoading: isPending } = useMutation({
     mutationFn: (datakho) => KhoAPI.nhapkho(datakho),
     onSuccess: () => {
       console.log("✅ Nhập kho thành công");
@@ -107,9 +131,8 @@ export default function Kho() {
   return (
     <div className="flex flex-col md:flex-row">
       <NagiveAdmin />
-
       {/* Nút nhập kho */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-50 gap-5">
         <button
           onClick={handleOpenNhapKho}
           className="cursor-pointer ring-2 rounded-2xl shadow-2xl border uppercase bg-white px-4 py-2 
@@ -118,8 +141,76 @@ export default function Kho() {
         >
           Nhập kho
         </button>
+        <button
+          onClick={(e) => handlenewkho(e)}
+          className="cursor-pointer ring-2 rounded-2xl shadow-2xl border uppercase bg-white px-4 py-2 mx-4
+          active:translate-x-0.5 active:translate-y-0.5 
+          hover:shadow-[0.5rem_0.5rem_#F44336,-0.5rem_-0.5rem_#00BCD4] transition"
+        >
+          Thêm kho chứa
+        </button>
       </div>
+      // thêm kho mới
+      {isnewkho && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-40 px-4">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto">
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              Thêm kho mới
+            </h2>
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+              <div className="flex flex-col">
+                <label className="mb-1 text-gray-600 font-medium">
+                  Tên kho
+                </label>
+                <input
+                  {...register("ten_kho", { required: true })}
+                  type="text"
+                  placeholder="Nhập tên kho"
+                  className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                />
+              </div>
 
+              <div className="flex flex-col">
+                <label className="mb-1 text-gray-600 font-medium">
+                  Địa chỉ kho
+                </label>
+                <input
+                  {...register("dia_chi", { required: true })}
+                  type="text"
+                  placeholder="Nhập địa chỉ kho"
+                  className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                />
+              </div>
+
+              <div className="flex justify-end mt-4 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setisnewkho(false)}
+                  className="px-6 py-2 rounded-xl border border-gray-300 hover:bg-gray-100 transition"
+                  disabled={isloadingkho}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className={`px-6 py-2 rounded-xl text-white font-semibold transition flex justify-center items-center ${
+                    isloadingkho
+                      ? "bg-blue-300 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
+                  disabled={isloadingkho}
+                >
+                  {isloadingkho ? (
+                    <div className="custom-loader"></div>
+                  ) : (
+                    "Thêm kho"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Modal nhập kho */}
       {is_addkho && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-40 px-2">
@@ -230,7 +321,6 @@ export default function Kho() {
           </div>
         </div>
       )}
-
       {/* Danh sách sản phẩm */}
       <div className="flex-1 p-4">
         <h2 className="text-xl font-bold mb-4 text-center">

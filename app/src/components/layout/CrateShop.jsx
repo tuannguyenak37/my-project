@@ -23,7 +23,7 @@ export default function ShopForm() {
     mutationFn: async (formData) => await API.crateshop(formData),
     onSuccess: () => {
       toast.success("✅ Tạo shop thành công!");
-      navigate("/", { replace: true });
+      navigate("/login", { replace: true });
     },
     onError: (err) => {
       console.error(err);

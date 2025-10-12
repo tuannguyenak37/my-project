@@ -10,6 +10,11 @@ const nhapkho = async (data) => {
 
   return await axiosInstance.put(URL_API, data);
 };
+const newkho = async (data) => {
+  const URL_API = "admin/addkho";
 
-const KHo = { xemthongtinkho, nhapkho };
+  return await axiosInstance.post(URL_API, data);
+};
+
+const KHo = { xemthongtinkho, nhapkho ,newkho};
 export default KHo;

@@ -1,23 +1,43 @@
-// Checkout.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
-
+import { useSelector, useDispatch } from "react-redux";
+import {
+  addToCart,
+  removeFromCart,
+  updateQuantity,
+  clearCart,
+  toggleSelect,
+} from "../../redux/slices/cart.js";
 import chekoutAPI from "../../utils/API/checkout";
 import CustomerInfoForm from "../ui/checkout/CustomerInfoForm.jsx";
 import ProductList from "../ui/checkout/ProductList.jsx";
 import OrderSummary from "../ui/checkout/OrderSummary.jsx";
 import PaymentMethod from "../ui/checkout/PaymentMethod.jsx";
+import { useNavigate } from "react-router-dom";
+
 const Checkout = () => {
+  const navigate = useNavigate();
   const savedProducts = sessionStorage.getItem("productsToCheckout");
   const productsToCheckout = useMemo(
     () => (savedProducts ? JSON.parse(savedProducts) : []),
     [savedProducts]
   );
-
-  const { handleSubmit, register, watch } = useForm({
+  //  lấy redux
+  const dispatch = useDispatch();
+  const cart = useSelector((sate) => sate.cart.items);
+  const handelremovecart = (id) => {
+    dispatch(removeFromCart(id));
+  };
+  // ✅ Thêm formState.errors
+  const {
+    handleSubmit,
+    register,
+    watch,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       shopNotes: {},
     },
@@ -37,7 +57,7 @@ const Checkout = () => {
       currency: "VND",
     }).format(amount);
 
-  // Group products by shop
+  // ✅ Gom nhóm sản phẩm theo shop
   const groupedItems = useMemo(() => {
     const grouped = {};
     productsToCheckout.forEach((item) => {
@@ -52,7 +72,7 @@ const Checkout = () => {
     return grouped;
   }, [productsToCheckout]);
 
-  // Calculate totals
+  // ✅ Tính tổng tiền
   useEffect(() => {
     if (!Object.keys(groupedItems).length) return;
 
@@ -84,18 +104,35 @@ const Checkout = () => {
 
   const { mutate: checkout, isPending } = useMutation({
     mutationFn: (data) => chekoutAPI.chekout_pay(data),
-    onSuccess: () => toast.success("✅ Đặt hàng thành công!"),
+    onSuccess: () => {
+      (toast.success("✅ Đặt hàng thành công! cảm ơn bạn đã mua hàng"),
+        navigate("/"));
+    },
+
     onError: (error) => {
       toast.error("❌ Có lỗi xảy ra khi đặt hàng!");
       console.error("❌ Lỗi :", error);
     },
   });
 
+  // ✅ Kiểm tra dữ liệu thiếu trước khi gửi
   const onSubmit = (data) => {
-    if (!selectedAddress)
-      return toast.error("❌ Vui lòng chọn địa chỉ giao hàng");
+    if (!selectedAddress) {
+      toast.error("❌ Vui lòng chọn địa chỉ giao hàng!");
+      return;
+    }
 
-    console.log("💳 Phương thức thanh toán:", data.paymentMethod); // <-- đây nè!
+    if (!data.paymentMethod) {
+      toast.error("❌ Vui lòng chọn phương thức thanh toán!");
+      return;
+    }
+
+    if (productsToCheckout.length === 0) {
+      toast.error("❌ Giỏ hàng trống, không thể đặt hàng!");
+      return;
+    }
+
+    console.log("💳 Phương thức thanh toán:", data.paymentMethod);
     const shopNotes = watch("shopNotes") || {};
 
     const list_sanpham = perShopTotals.flatMap((p) => {
@@ -117,6 +154,11 @@ const Checkout = () => {
 
     checkout(orderData);
     console.log("🧾 Dữ liệu đơn hàng gửi lên API:", orderData);
+
+    // Duyệt qua từng sản phẩm trong shop đó
+    for (const sp of orderData.list_sanpham) {
+      handelremovecart(sp.sanpham_id); // gọi hàm xóa từng sản phẩm
+    }
   };
 
   return (
@@ -137,8 +179,10 @@ const Checkout = () => {
               formatCurrency={formatCurrency}
               register={register}
             />
+            {/* ✅ Truyền errors vào PaymentMethod */}
+            <PaymentMethod register={register} errors={errors} />
           </div>
-          <PaymentMethod register={register} />
+
           <div className="lg:col-span-1">
             <OrderSummary
               summary={summary}

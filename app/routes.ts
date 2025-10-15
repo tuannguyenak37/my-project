@@ -6,7 +6,8 @@ export default [
 
   // "/login" -> load routes/login.tsx
   route("login", "./src/components/page/LoginPage.jsx"),
-  route("dashboard", "./src/components/page/Dashborad.jsx"),
+  route("/dashboard", "./src/components/page/Dashborad.jsx"),
+  route("billingadmin", "./src/components/page/admin/bill/Billing.jsx"),
   route("sanpham", "./src/components/page/admin/Sanpham.jsx"),
   route("kho", "./src/components/page/admin/Kho.jsx"),
   route("/product/:id", "./src/components/page/ProductDetail.jsx"),
@@ -25,5 +26,11 @@ export default [
   route(
     "/TermsOfService",
     "./src/components/ui/operating_policy/TermsOfService.jsx"
+  ),
+  // ✅ Nested route: Billing nằm trong DashboardUser
+  route(
+    "/dashboardUser",
+    "./src/components/page/dashborad_user/Dashborad.jsx",
+    [route("billing", "./src/components/page/dashborad_user/Billing.jsx")]
   ),
 ] satisfies RouteConfig;

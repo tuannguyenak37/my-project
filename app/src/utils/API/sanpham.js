@@ -22,6 +22,10 @@ const bestseller = async () => {
   const URL_API = `/bestseller`;
   return await axiosInstance.get(URL_API);
 };
+const random20 = async () => {
+  const URL_API = `/sp20`;
+  return await axiosInstance.get(URL_API);
+};
 
-const SP = { addSP, xemkho, SP_client, xemCTSP, bestseller };
+const SP = { addSP, xemkho, SP_client, xemCTSP, bestseller, random20 };
 export default SP;

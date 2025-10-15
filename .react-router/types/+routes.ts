@@ -19,6 +19,9 @@ type Pages = {
   "/dashboard": {
     params: {};
   };
+  "/billingadmin": {
+    params: {};
+  };
   "/sanpham": {
     params: {};
   };
@@ -51,12 +54,18 @@ type Pages = {
   "/TermsOfService": {
     params: {};
   };
+  "/dashboardUser": {
+    params: {};
+  };
+  "/dashboardUser/billing": {
+    params: {};
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login" | "/dashboard" | "/sanpham" | "/kho" | "/product/:id" | "/shop" | "/cart" | "/checkout" | "/security" | "/MalikethPolicy" | "/ReturnRefundPolicy" | "/TermsOfService";
+    page: "/" | "/login" | "/dashboard" | "/billingadmin" | "/sanpham" | "/kho" | "/product/:id" | "/shop" | "/cart" | "/checkout" | "/security" | "/MalikethPolicy" | "/ReturnRefundPolicy" | "/TermsOfService" | "/dashboardUser" | "/dashboardUser/billing";
   };
   "routes/home.tsx": {
     id: "routes/home";
@@ -69,6 +78,10 @@ type RouteFiles = {
   "./src/components/page/Dashborad.jsx": {
     id: "src/components/page/Dashborad";
     page: "/dashboard";
+  };
+  "./src/components/page/admin/bill/Billing.jsx": {
+    id: "src/components/page/admin/bill/Billing";
+    page: "/billingadmin";
   };
   "./src/components/page/admin/Sanpham.jsx": {
     id: "src/components/page/admin/Sanpham";
@@ -109,5 +122,13 @@ type RouteFiles = {
   "./src/components/ui/operating_policy/TermsOfService.jsx": {
     id: "src/components/ui/operating_policy/TermsOfService";
     page: "/TermsOfService";
+  };
+  "./src/components/page/dashborad_user/Dashborad.jsx": {
+    id: "src/components/page/dashborad_user/Dashborad";
+    page: "/dashboardUser" | "/dashboardUser/billing";
+  };
+  "./src/components/page/dashborad_user/Billing.jsx": {
+    id: "src/components/page/dashborad_user/Billing";
+    page: "/dashboardUser/billing";
   };
 };

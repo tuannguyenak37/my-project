@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 export default function MalikethMall() {
   const [SP4, setSP4] = useState([]);
   const [bestseller4, setbestseller4] = useState([]);
+  const [radom20, setrandom20] = useState([]);
   const { mutate: xem_SP } = useMutation({
     mutationFn: () => api_SP.SP_client(),
     onSuccess: (res) => {
@@ -14,6 +15,16 @@ export default function MalikethMall() {
       console.error("❌ Lỗi khi gọi API:", error);
     },
   });
+  const handelrandom20 = useMutation({
+    mutationFn: () => api_SP.random20(),
+    onSuccess: (res) => {
+      setrandom20(res.data.data);
+    },
+    onError: (error) => {
+      console.error("❌ Lỗi khi gọi API:", error);
+    },
+  });
+
   const { mutate: bestseller } = useMutation({
     mutationFn: () => api_SP.bestseller(),
     onSuccess: (res) => {
@@ -27,6 +38,7 @@ export default function MalikethMall() {
   useEffect(() => {
     xem_SP();
     bestseller();
+    handelrandom20.mutate();
   }, []);
 
   return (
@@ -111,9 +123,12 @@ export default function MalikethMall() {
                   {item.gia_ban.toLocaleString()}₫
                 </p>
 
-                <button className="mt-3 w-full bg-orange-500 text-white py-1.5 px-3 rounded-xl font-medium hover:bg-orange-600 transition-colors duration-300">
+                <Link
+                  to={`/product/${item.sanpham_id}`}
+                  className="mt-3 w-full bg-orange-500 text-white py-1.5 px-3 rounded-xl font-medium hover:bg-orange-600 transition-colors duration-300"
+                >
                   Mua ngay
-                </button>
+                </Link>
               </div>
             </div>
           ))}
@@ -135,9 +150,8 @@ export default function MalikethMall() {
           </button>
         </div>
 
-        {/* Danh sách sản phẩm giảm giá */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {SP4.map((items) => (
+          {radom20.map((items) => (
             <div
               className="bg-gray-50 rounded-xl shadow-md p-3 text-center"
               key={items.sanpham_id}
@@ -156,7 +170,7 @@ export default function MalikethMall() {
               <h2 className="text-base font-semibold text-gray-800">
                 {items.ten_sanpham}
               </h2>
-              <p className="text-sm line-through text-gray-400">250.000đ</p>
+
               <p className="text-lg font-bold text-red-600">{items.gia_ban}đ</p>
               <Link
                 to={`/product/${items.sanpham_id}`}

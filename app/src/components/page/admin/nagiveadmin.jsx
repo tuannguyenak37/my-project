@@ -26,7 +26,7 @@ export default function NagiveAdmin() {
             </li>
             <li>
               <NavLink
-                to="/notifications"
+                to="/billingadmin"
                 className={({ isActive }) =>
                   `block p-2 rounded ${isActive ? "bg-gray-800 text-white" : "hover:bg-gray-200"}`
                 }

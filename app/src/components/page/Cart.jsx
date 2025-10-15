@@ -8,7 +8,7 @@ import {
   clearCart,
   toggleSelect,
 } from "../../redux/slices/cart.js";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const navigate = useNavigate(); // ✅ chỉ được gọi trong function component
@@ -127,9 +127,9 @@ const Cart = () => {
     <div className="container mx-auto p-4 max-w-5xl bg-gray-100 font-sans min-h-screen">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-800">Giỏ hàng</h1>
-        <a href="#" className="text-orange-600 hover:underline">
+        <Link to="/" className="text-orange-600 hover:underline cursor-pointer">
           Tiếp tục mua sắm
-        </a>
+        </Link>
       </div>
 
       <div id="cart-items" className="bg-white rounded-lg shadow-md mb-4">

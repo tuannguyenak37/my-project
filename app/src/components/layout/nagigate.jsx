@@ -3,8 +3,13 @@ import { Menu, X, ShoppingCart, User } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import fetchUserFromCookie from "../../redux/slices/userThunk.js";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export default function Navbar() {
+  const Navigate = useNavigate();
+  const logout = (e) => {
+    Navigate("/login");
+  };
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -83,17 +88,20 @@ export default function Navbar() {
                     Hồ sơ cá nhân
                   </a>
                   <a
-                    href="/orders"
+                    href="/dashboardUser"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     Đơn hàng của tôi
                   </a>
-                  <Link
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    to="/dashboard"
-                  >
-                    Shop của tôi
-                  </Link>
+                  {user?.shop_id && (
+                    <Link
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      to="/dashboard"
+                    >
+                      Shop của tôi
+                    </Link>
+                  )}
+
                   <button
                     onClick={() => dispatch(logout())}
                     className="w-full text-left px-4 py-2  hover:bg-gray-100 text-red-600"

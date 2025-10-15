@@ -10,7 +10,7 @@ const newdiachi = async (data) => {
 
   return await axiosInstance.post(URL_API, data);
 };
-const xemkh = async (data) => {
+const xemkh = async () => {
   const URL_API = "/xemkh";
 
   return await axiosInstance.get(URL_API);

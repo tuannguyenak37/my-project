@@ -2,49 +2,49 @@ import React, { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import api_SP from "../../utils/API/sanpham.js";
 import { Link } from "react-router-dom";
+
 export default function MalikethMall() {
   const [SP4, setSP4] = useState([]);
   const [bestseller4, setbestseller4] = useState([]);
-  const [radom20, setrandom20] = useState([]);
+  const [random20, setRandom20] = useState([]);
+
+  // API: Danh sách sản phẩm giảm giá
   const { mutate: xem_SP } = useMutation({
     mutationFn: () => api_SP.SP_client(),
-    onSuccess: (res) => {
-      setSP4(res.data.data);
-    },
-    onError: (error) => {
-      console.error("❌ Lỗi khi gọi API:", error);
-    },
-  });
-  const handelrandom20 = useMutation({
-    mutationFn: () => api_SP.random20(),
-    onSuccess: (res) => {
-      setrandom20(res.data.data);
-    },
-    onError: (error) => {
-      console.error("❌ Lỗi khi gọi API:", error);
-    },
+    onSuccess: (res) => setSP4(res.data.data),
+    onError: (error) => console.error("❌ Lỗi khi gọi API:", error),
   });
 
+  // API: Sản phẩm gợi ý ngẫu nhiên
+  const handelrandom20 = useMutation({
+    mutationFn: () => api_SP.random20(),
+    onSuccess: (res) => setRandom20(res.data.data),
+    onError: (error) => console.error("❌ Lỗi khi gọi API:", error),
+  });
+
+  // API: Sản phẩm bán chạy
   const { mutate: bestseller } = useMutation({
     mutationFn: () => api_SP.bestseller(),
-    onSuccess: (res) => {
-      setbestseller4(res.data.data);
-    },
-    onError: (error) => {
-      console.error("❌ Lỗi khi gọi API:", error);
-    },
+    onSuccess: (res) => setbestseller4(res.data.data),
+    onError: (error) => console.error("❌ Lỗi khi gọi API:", error),
   });
-  // Gọi API 1 lần khi component mount
+
+  // Gọi API khi component mount
   useEffect(() => {
     xem_SP();
     bestseller();
     handelrandom20.mutate();
   }, []);
 
+  // Hàm định dạng tiền tệ VND
+  const formatVND = (value) =>
+    value?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) ||
+    "0 ₫";
+
   return (
     <div className="mt-4 mx-3">
+      {/* --- Phần giới thiệu chính --- */}
       <div className="shadow-lg rounded-2xl bg-white p-6 m-4 w-full">
-        {/* Phần giới thiệu */}
         <div className="mb-6">
           <h2 className="text-3xl font-bold text-blue-600 mb-3">
             Maliketh MALL
@@ -58,31 +58,33 @@ export default function MalikethMall() {
           </button>
         </div>
 
-        {/* Danh sách sản phẩm giảm giá */}
+        {/* --- Danh sách sản phẩm giảm giá --- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {SP4.map((items) => (
+          {SP4.map((item) => (
             <div
               className="bg-gray-50 rounded-xl shadow-md p-3 text-center"
-              key={items.sanpham_id}
+              key={item.sanpham_id}
             >
               <h1 className="text-lg font-semibold text-red-500 mb-2">
                 🔥 Giảm giá
               </h1>
               <div className="aspect-[4/3] w-full bg-white rounded-2xl border border-gray-300 shadow-md flex items-center justify-center overflow-hidden">
                 <img
-                  src={items.url_sanpham}
-                  alt={items.ten_sanpham}
+                  src={item.url_sanpham}
+                  alt={item.ten_sanpham}
                   className="w-full h-full object-contain"
                 />
               </div>
 
-              <h2 className="text-base font-semibold text-gray-800">
-                {items.ten_sanpham}
+              <h2 className="text-base font-semibold text-gray-800 mt-2">
+                {item.ten_sanpham}
               </h2>
-              <p className="text-sm line-through text-gray-400">250.000đ</p>
-              <p className="text-lg font-bold text-red-600">{items.gia_ban}đ</p>
+              <p className="text-sm line-through text-gray-400">250.000 ₫</p>
+              <p className="text-lg font-bold text-red-600">
+                {formatVND(item.gia_ban)}
+              </p>
               <Link
-                to={`/product/${items.sanpham_id}`}
+                to={`/product/${item.sanpham_id}`}
                 className="mt-2 w-full bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600 transition"
               >
                 Mua ngay
@@ -92,7 +94,7 @@ export default function MalikethMall() {
         </div>
       </div>
 
-      {/* Block sản phẩm bán chạy */}
+      {/* --- Sản phẩm bán chạy --- */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mt-5">
         <h1 className="text-2xl font-bold text-orange-500 mb-6 text-center">
           🏆 Sản phẩm bán chạy hàng đầu 😍
@@ -120,7 +122,7 @@ export default function MalikethMall() {
                   {item.ten_sanpham}
                 </h2>
                 <p className="text-lg font-bold text-red-600 mt-1">
-                  {item.gia_ban.toLocaleString()}₫
+                  {formatVND(item.gia_ban)}
                 </p>
 
                 <Link
@@ -135,15 +137,14 @@ export default function MalikethMall() {
         </div>
       </div>
 
+      {/* --- Sản phẩm gợi ý --- */}
       <div className="shadow-lg rounded-2xl bg-white p-6 m-4 w-full">
-        {/* Phần giới thiệu */}
         <div className="mb-6">
           <h2 className="text-3xl font-bold text-blue-600 mb-3">
-            Maliketh MALL ❤️sản phậm gợi ý cho bạn
+            Maliketh MALL ❤️ Sản phẩm gợi ý cho bạn
           </h2>
           <p className="text-gray-600 mb-4">
-            {" "}
-            không biết mua gì hãy thử xem nào ?
+            Không biết mua gì? Hãy thử xem những gợi ý dưới đây nhé!
           </p>
           <button className="w-full md:w-auto bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700 transition">
             Khám phá ngay
@@ -151,29 +152,30 @@ export default function MalikethMall() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {radom20.map((items) => (
+          {random20.map((item) => (
             <div
               className="bg-gray-50 rounded-xl shadow-md p-3 text-center"
-              key={items.sanpham_id}
+              key={item.sanpham_id}
             >
               <h1 className="text-lg font-semibold text-red-500 mb-2">
-                💕 gọi ý cho bạn+
+                💕 Gợi ý cho bạn
               </h1>
               <div className="aspect-[4/3] w-full bg-white rounded-2xl border border-gray-300 shadow-md flex items-center justify-center overflow-hidden">
                 <img
-                  src={items.url_sanpham}
-                  alt={items.ten_sanpham}
+                  src={item.url_sanpham}
+                  alt={item.ten_sanpham}
                   className="w-full h-full object-contain"
                 />
               </div>
 
-              <h2 className="text-base font-semibold text-gray-800">
-                {items.ten_sanpham}
+              <h2 className="text-base font-semibold text-gray-800 mt-2">
+                {item.ten_sanpham}
               </h2>
-
-              <p className="text-lg font-bold text-red-600">{items.gia_ban}đ</p>
+              <p className="text-lg font-bold text-red-600">
+                {formatVND(item.gia_ban)}
+              </p>
               <Link
-                to={`/product/${items.sanpham_id}`}
+                to={`/product/${item.sanpham_id}`}
                 className="mt-2 w-full bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600 transition"
               >
                 Mua ngay

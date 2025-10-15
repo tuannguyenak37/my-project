@@ -16,5 +16,23 @@ const updatebill = async (data) => {
 
   return await axiosInstance.put(URL_API, data);
 };
-const bill = { getallbill, getallbillshop, updatebill };
+const updateBillRefunded = async (data) => {
+  console.log("data ", data);
+  const URL_API = "/updateBillRefunded";
+
+  return await axiosInstance.put(URL_API, data);
+};
+const getBillDetail = async (data) => {
+  console.log("data ", data);
+  const URL_API = `/getBillDetail/${data}`;
+
+  return await axiosInstance.get(URL_API);
+};
+const bill = {
+  getallbill,
+  getallbillshop,
+  updatebill,
+  updateBillRefunded,
+  getBillDetail,
+};
 export default bill;

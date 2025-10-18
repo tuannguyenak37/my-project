@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import banner1 from "../../style/img/banhkemhoa.jpg";
+import banner1 from "../../../../public/baner.jpg";
 import banner2 from "../../style/img/hoahuongduongcanh.jpg";
 import banner3 from "../../style/img/vittrang.jpg";
 import small1 from "../../style/img/hoahuongduongcanh.jpg";

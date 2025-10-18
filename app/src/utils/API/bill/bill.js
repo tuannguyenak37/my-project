@@ -1,3 +1,4 @@
+import { data } from "react-router-dom";
 import axiosInstance from "../../AxiosConfig.js";
 
 const getallbill = async () => {
@@ -28,11 +29,17 @@ const getBillDetail = async (data) => {
 
   return await axiosInstance.get(URL_API);
 };
+const feedBack = async (data) => {
+  const URL_API = `/newfeedback`;
+
+  return await axiosInstance.get(URL_API, data);
+};
 const bill = {
   getallbill,
   getallbillshop,
   updatebill,
   updateBillRefunded,
   getBillDetail,
+  feedBack,
 };
 export default bill;

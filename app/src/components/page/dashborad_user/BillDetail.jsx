@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import billAPI from "../../../utils/API/bill/bill";
 import toast from "react-hot-toast";
+import FeedBack from "./FeedBack";
 
 export default function BillDetail({ hoadon_id }) {
   const [billData, setBillData] = useState(null);
@@ -161,6 +162,10 @@ export default function BillDetail({ hoadon_id }) {
                       Thành tiền: {formatVND(sp.thanh_tien)}
                     </p>
                   </div>
+                </div>
+                {/* // đánh gia */}
+                <div>
+                  {/* <FeedBack sanpham_id={sp.sanpham_id} hoadon_id={hoadon_id} /> */}
                 </div>
               </div>
             ))}

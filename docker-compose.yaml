@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build: ./
+    ports:
+      - "5173:80"
+    env_file:
+      - .env.docker
+    networks:
+      - phpadmin_my_network
+
+networks:
+  phpadmin_my_network:
+    external: true

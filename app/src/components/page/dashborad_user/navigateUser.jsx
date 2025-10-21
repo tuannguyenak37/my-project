@@ -3,6 +3,7 @@ import Avatar from "../../../../../public/avatar.jpg";
 import { EditOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
+
 export default function navigate() {
   const user = useSelector((state) => state.user.user);
   console.log(">>>user", user);

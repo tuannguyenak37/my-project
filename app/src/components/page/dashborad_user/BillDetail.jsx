@@ -16,11 +16,13 @@ export default function BillDetail({ hoadon_id }) {
     },
     onError: () => toast.error("Lỗi khi tải chi tiết hóa đơn"),
   });
+  //  lấy rating của shop
+ 
 
   useEffect(() => {
     if (hoadon_id) getBillDetail(hoadon_id);
   }, [hoadon_id]);
-
+   
   const formatVND = (v) =>
     v?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "0 ₫";
 
@@ -138,34 +140,36 @@ export default function BillDetail({ hoadon_id }) {
           </h2>
           <div className="space-y-6">
             {sanpham.map((sp) => (
-              <div
-                key={sp.cthd_id}
-                className="flex items-start gap-4 border-b border-gray-200 pb-4"
-              >
-                <img
-                  src={sp.url_sanpham}
-                  alt={sp.ten_sanpham}
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-800">
-                    {sp.ten_sanpham}
-                  </h3>
-                  <p className="text-gray-600 text-sm">Mô tả: {sp.mo_ta}</p>
-                  <p className="text-gray-600 text-sm">Loại: {sp.loai}</p>
-                  <div className="flex justify-between mt-2">
-                    <p className="text-gray-600">Số lượng: {sp.so_luong}</p>
-                    <p className="text-gray-600">
-                      Giá: {formatVND(sp.gia_ban)}
-                    </p>
-                    <p className="font-bold text-[#9f1818]">
-                      Thành tiền: {formatVND(sp.thanh_tien)}
-                    </p>
+              <div>
+                <div
+                  key={sp.cthd_id}
+                  className="flex items-start gap-4 border-b border-gray-200 pb-4"
+                >
+                  <img
+                    src={sp.url_sanpham}
+                    alt={sp.ten_sanpham}
+                    className="w-24 h-24 object-cover rounded-lg"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-800">
+                      {sp.ten_sanpham}
+                    </h3>
+                    <p className="text-gray-600 text-sm">Mô tả: {sp.mo_ta}</p>
+                    <p className="text-gray-600 text-sm">Loại: {sp.loai}</p>
+                    <div className="flex justify-between mt-2">
+                      <p className="text-gray-600">Số lượng: {sp.so_luong}</p>
+                      <p className="text-gray-600">
+                        Giá: {formatVND(sp.gia_ban)}
+                      </p>
+                      <p className="font-bold text-[#9f1818]">
+                        Thành tiền: {formatVND(sp.thanh_tien)}
+                      </p>
+                    </div>
                   </div>
+                  {/* // đánh gia */}
                 </div>
-                {/* // đánh gia */}
-                <div>
-                  {/* <FeedBack sanpham_id={sp.sanpham_id} hoadon_id={hoadon_id} /> */}
+                <div className="">
+                  <FeedBack sanpham_id={sp.sanpham_id} hoadon_id={hoadon_id} />
                 </div>
               </div>
             ))}

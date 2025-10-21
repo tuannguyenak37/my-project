@@ -11,7 +11,10 @@ export default function MalikethMall() {
   // API: Danh sách sản phẩm giảm giá
   const { mutate: xem_SP } = useMutation({
     mutationFn: () => api_SP.SP_client(),
-    onSuccess: (res) => setSP4(res.data.data),
+    onSuccess: (res) => {
+      setSP4(res.data.data);
+      console.log("dữ liệu", SP4);
+    },
     onError: (error) => console.error("❌ Lỗi khi gọi API:", error),
   });
 
@@ -33,6 +36,7 @@ export default function MalikethMall() {
   useEffect(() => {
     xem_SP();
     bestseller();
+
     handelrandom20.mutate();
   }, []);
 

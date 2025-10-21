@@ -33,4 +33,5 @@ export default [
     "./src/components/page/dashborad_user/Dashborad.jsx",
     [route("billing", "./src/components/page/dashborad_user/Billing.jsx")]
   ),
+  route("/shearch/:keyword", "./src/components/ui/shearch/Sheacrch_Detail.jsx"),
 ] satisfies RouteConfig;

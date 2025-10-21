@@ -4,12 +4,28 @@ import Nagigate from "../layout/nagigate.jsx";
 import { useMutation } from "@tanstack/react-query";
 import APISP from "../../utils/API/sanpham.js";
 import { useAddToCart } from "../shared/cart.jsx"; // ✅ import đúng hook
-
+import GetFeedback from "../shared/Getfeedback.jsx";
+import apiFeedback from "../../utils/API/bill/feedback.js";
 export default function ProductDetail() {
   const { id } = useParams();
   const [productDetail, setProductDetail] = useState(null);
   const [soLuong, setSoLuong] = useState(1);
-
+  // laays rating shop
+  const [shopRating, setShopRating] = useState(null);
+  const RatingofShop = useMutation({
+    mutationFn: (shop_id) => apiFeedback.feedback_ofshop(shop_id),
+    onSuccess: (res) => {
+      console.log("res rating shop", res.data);
+      if (res.data?.status === "success") {
+        if (res.data.data[0].rating_trung_binh_shop === 0) {
+          return setShopRating(null);
+        }
+        setShopRating(res.data.data[0].rating_trung_binh_shop);
+        console.log("rating shop", res.data.data[0].rating_trung_binh_shop);
+      } else toast.error("Không tìm thấy đánh giá của shop");
+    },
+    onError: () => toast.error("Lỗi khi tải đánh giá của shop"),
+  });
   // ✅ khai báo hook addToCartp
   const addToCartp = useAddToCart();
 
@@ -17,6 +33,7 @@ export default function ProductDetail() {
     mutationFn: (id) => APISP.xemCTSP(id),
     onSuccess: (res) => {
       setProductDetail(res.data.data);
+      RatingofShop.mutate(res.data.data.shop_id);
     },
     onError: (error) => {
       console.error("❌ Lỗi khi xem chi tiết SP:", error);
@@ -47,10 +64,9 @@ export default function ProductDetail() {
   console.log(">>>>", product.mo_ta);
   const shop = {
     ten_shop: productDetail.ten_shop,
-    dia_chi: "123 Nguyễn Văn Linh, Bình Dương",
-    sdt: "0909 999 999",
-    avatar:
-      "https://down-vn.img.susercontent.com/file/sg-11134201-7rdxd-lu4t2izwd9av7e", // ảnh logo shop
+    dia_chi: productDetail.dia_chi_shop,
+    sdt: "cùng mua sắm nào ❤️",
+    avatar: productDetail.url_shop, // ảnh logo shop
   };
   return (
     <div>
@@ -76,7 +92,6 @@ export default function ProductDetail() {
             <p className="text-3xl font-bold text-red-500 mb-4">
               còn: {product.so_luong}
             </p>
-            <p className="text-gray-600 mb-6">{product.mo_ta}</p>
 
             {/* Số lượng */}
             <div className="flex items-center gap-3 mb-4">
@@ -130,14 +145,58 @@ export default function ProductDetail() {
             <div>
               <h2 className="text-lg font-semibold">{shop.ten_shop}</h2>
               <p className="text-gray-600">{shop.dia_chi}</p>
-              <p className="text-gray-600">{shop.sdt}</p>
+              {shopRating !== null && !isNaN(Number(shopRating)) && (
+                <div className="flex items-center mt-1">
+                  {Array.from({ length: 5 }, (_, i) => {
+                    const rating = Number(shopRating);
+                    const fullStar = i + 1 <= Math.floor(rating);
+                    const halfStar =
+                      i + 1 === Math.ceil(rating) && rating % 1 >= 0.5;
+
+                    return (
+                      <span
+                        key={i}
+                        className="relative text-yellow-400 text-xl mr-0.5"
+                      >
+                        {fullStar ? (
+                          "★"
+                        ) : halfStar ? (
+                          <span className="relative">
+                            <span className="absolute left-0 overflow-hidden w-[50%]">
+                              ★
+                            </span>
+                            <span className="text-gray-300">★</span>
+                          </span>
+                        ) : (
+                          <span className="text-gray-300">★</span>
+                        )}
+                      </span>
+                    );
+                  })}
+                  <span className="ml-2 text-gray-700 text-xl">
+                    {Number(shopRating).toFixed(1)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
             Xem shop
           </button>
         </div>
+        {/* mô tae ản phẩm */}
+        <div className="p-6 bg-white rounded-lg shadow-md mt-3">
+          <h2 className="text-2xl font-semibold mb-4">Mô tả sản phẩm:</h2>{" "}
+          <p className="text-black text-xl">{product.mo_ta}</p>
+        </div>
+        <div>
+          <GetFeedback
+            shop_id={productDetail.shop_id}
+            sanpham_id={productDetail.sanpham_id}
+          />
+        </div>
       </div>
+      {/* danh gia sna pham */}
     </div>
   );
 }

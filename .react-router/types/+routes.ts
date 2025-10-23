@@ -65,12 +65,15 @@ type Pages = {
       "keyword": string;
     };
   };
+  "/profile": {
+    params: {};
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login" | "/dashboard" | "/billingadmin" | "/sanpham" | "/kho" | "/product/:id" | "/shop" | "/cart" | "/checkout" | "/security" | "/MalikethPolicy" | "/ReturnRefundPolicy" | "/TermsOfService" | "/dashboardUser" | "/dashboardUser/billing" | "/shearch/:keyword";
+    page: "/" | "/login" | "/dashboard" | "/billingadmin" | "/sanpham" | "/kho" | "/product/:id" | "/shop" | "/cart" | "/checkout" | "/security" | "/MalikethPolicy" | "/ReturnRefundPolicy" | "/TermsOfService" | "/dashboardUser" | "/dashboardUser/billing" | "/shearch/:keyword" | "/profile";
   };
   "routes/home.tsx": {
     id: "routes/home";
@@ -139,5 +142,9 @@ type RouteFiles = {
   "./src/components/ui/shearch/Sheacrch_Detail.jsx": {
     id: "src/components/ui/shearch/Sheacrch_Detail";
     page: "/shearch/:keyword";
+  };
+  "./src/components/page/profile/Profile.jsx": {
+    id: "src/components/page/profile/Profile";
+    page: "/profile";
   };
 };

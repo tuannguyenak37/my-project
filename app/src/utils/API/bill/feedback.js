@@ -19,4 +19,10 @@ const feedback_ofshop = async (data) => {
 
   return await axiosInstance.get(URL_API);
 };
-export default { getfeedback, feedback_ofshop };
+const averagerating = async (data) => {
+  const URL_API = `/averagerating/${data.sanpham_id}`;
+
+  return await axiosInstance.get(URL_API);
+};
+
+export default { getfeedback, feedback_ofshop, averagerating };

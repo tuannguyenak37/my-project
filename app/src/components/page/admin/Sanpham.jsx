@@ -4,6 +4,10 @@ import { useForm } from "react-hook-form";
 import axios from "../../../utils/API/kho.js";
 import APIADDSP from "../../../utils/API/sanpham.js";
 import { toast } from "react-hot-toast";
+import apiSp from "../../../utils/API/sanpham.js";
+import SuaSanpham from "../../ui/SuaSanpham.jsx";
+import { useMutation } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Sanpham() {
   const [isAddSP, setIsAddSP] = useState(false);
@@ -14,6 +18,18 @@ export default function Sanpham() {
   const [editingSP, setEditingSP] = useState(null);
   const [giaBanInput, setGiaBanInput] = useState("");
 
+  // ✅ Mutation xóa sản phẩm
+  const feth_deleteSP = useMutation({
+    mutationFn: async (id) => await APIADDSP.delete_sp(id),
+    onSuccess: () => {
+      toast.success("Xóa sản phẩm thành công!");
+      fetchSanpham();
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Lỗi xóa sản phẩm!");
+    },
+  });
+
   const {
     register,
     handleSubmit,
@@ -22,291 +38,328 @@ export default function Sanpham() {
     formState: { errors },
   } = useForm({ mode: "onChange" });
 
+  // 🔹 Lấy dữ liệu ban đầu
   useEffect(() => {
     const fetchKho = async () => {
       try {
         const res = await axios.xemthongtinkho();
         setKho(res.data.data);
       } catch (err) {
-        console.log("Lỗi:", err.response?.data || err.message);
+        console.log("Lỗi load kho:", err.response?.data || err.message);
       }
     };
     fetchKho();
     fetchSanpham();
   }, []);
 
+  // 🔹 Load danh sách sản phẩm
   const fetchSanpham = async () => {
     try {
-      const res = await APIADDSP.laySP();
+      const res = await apiSp.SP_ofshop();
       setSanphamList(res.data.data);
     } catch (err) {
-      console.log("Lỗi load SP:", err.response?.data || err.message);
+      console.log("Lỗi load sản phẩm:", err.response?.data || err.message);
     }
   };
 
+  // 🔹 Xử lý format giá bán khi nhập
   const handleGiaBanChange = (e) => {
     let value = e.target.value.replace(/\D/g, "");
     setGiaBanInput(new Intl.NumberFormat("vi-VN").format(value));
     setValue("gia_ban", Number(value));
   };
 
+  // 🔹 Thêm sản phẩm
   const handelAddSP = async (data) => {
-    setLoading(true);
-    const formData = new FormData();
-    if (urlSanpham) formData.append("url_sanpham", urlSanpham);
-    formData.append("ten_sanpham", data.ten_sanpham);
-    formData.append("gia_ban", data.gia_ban);
-    formData.append("mo_ta", data.mo_ta || "");
-    formData.append("so_luong_ton", data.so_luong_ton);
-    formData.append("kho_id", data.kho_id);
-    formData.append("loai_sanpham", data.loai_sanpham);
-    formData.append("nha_cung_cap", data.nha_cung_cap);
-    console.log("data thêm sp", formData);
     try {
-      if (editingSP) {
-        await APIADDSP.suaSP(editingSP.sanpham_id, formData);
-        toast.success("Cập nhật sản phẩm thành công!");
-      } else {
-        await APIADDSP.addSP(formData);
-        toast.success("Thêm sản phẩm thành công!");
+      setLoading(true);
+      const formData = new FormData();
+      for (const key in data) {
+        formData.append(key, data[key]);
       }
-      reset();
-      setIsAddSP(false);
-      setEditingSP(null);
-      setGiaBanInput("");
+      if (urlSanpham) formData.append("url_sanpham", urlSanpham);
+
+      await APIADDSP.addSP(formData);
+      toast.success("Thêm sản phẩm thành công!");
       fetchSanpham();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Lỗi server!");
+      setIsAddSP(false);
+      reset();
+      setGiaBanInput("");
+      setUrlSanpham(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Lỗi thêm sản phẩm!");
     } finally {
       setLoading(false);
     }
   };
 
+  // 🔹 Khi click "Sửa"
   const handleEditSP = (sp) => {
     setEditingSP(sp);
-    setIsAddSP(true);
-    setValue("ten_sanpham", sp.ten_sanpham);
-    setValue("gia_ban", sp.gia_ban);
-    setValue("mo_ta", sp.mo_ta);
-    setValue("so_luong_ton", sp.so_luong_ton);
-    setValue("kho_id", sp.kho_id);
-    setValue("loai_sanpham", sp.loai_sanpham);
-    setValue("nha_cung_cap", sp.nha_cung_cap);
-    setGiaBanInput(new Intl.NumberFormat("vi-VN").format(sp.gia_ban));
-    setUrlSanpham(null);
   };
 
-  const handleDeleteSP = async (id) => {
-    if (confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
-      try {
-        await APIADDSP.xoaSP(id);
-        toast.success("Xóa sản phẩm thành công!");
-        fetchSanpham();
-      } catch (err) {
-        toast.error(err.response?.data?.message || "Lỗi xóa SP");
-      }
+  // 🔹 Khi click "Xóa"
+  const handleDeleteSP = (id) => {
+    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+      feth_deleteSP.mutate(id);
     }
   };
 
+  // 🔹 Format hiển thị giá tiền
   const formatTien = (number) => {
     if (!number && number !== 0) return "";
     return number.toLocaleString("vi-VN") + "₫";
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-50">
       <Nagiveadmin />
-      <div className="flex-1 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
+
+      <div className="flex-1 p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
             Danh sách sản phẩm
           </h1>
-          <button
+          <motion.button
             onClick={() => {
               setIsAddSP(true);
-              setEditingSP(null);
               reset();
               setUrlSanpham(null);
               setGiaBanInput("");
             }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl shadow-md transition duration-300"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md transition-colors duration-200"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             Thêm sản phẩm
-          </button>
+          </motion.button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {/* Danh sách sản phẩm */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sanphamList.map((sp) => (
-            <div
+            <motion.div
               key={sp.sanpham_id}
-              className="bg-white p-4 rounded-2xl shadow-md hover:shadow-xl transition flex flex-col justify-between"
+              className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <div className="h-40 bg-gray-200 rounded mb-4 flex items-center justify-center text-gray-500 overflow-hidden">
+              <div className="h-48 bg-gray-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                 {sp.url_sanpham ? (
                   <img
                     src={sp.url_sanpham}
                     alt={sp.ten_sanpham}
-                    className="object-cover h-full w-full rounded"
+                    className="object-cover h-full w-full"
                   />
                 ) : (
-                  "Ảnh sản phẩm"
+                  <span className="text-gray-500">Ảnh sản phẩm</span>
                 )}
               </div>
-              <h3 className="font-semibold text-lg">{sp.ten_sanpham}</h3>
-              <p className="text-gray-500">{sp.mo_ta}</p>
-              <p className="text-blue-600 font-bold mt-2">
+              <h3 className="font-semibold text-lg text-gray-800 line-clamp-1">
+                {sp.ten_sanpham}
+              </h3>
+              <p className="text-gray-600 text-sm line-clamp-2 mt-1">
+                {sp.mo_ta}
+              </p>
+              <p className="text-blue-600 font-bold text-lg mt-2">
                 {formatTien(sp.gia_ban)}
               </p>
-              <div className="flex justify-end gap-2 mt-4">
-                <button
+              <div className="flex justify-end gap-3 mt-4">
+                <motion.button
                   onClick={() => handleEditSP(sp)}
-                  className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg transition"
+                  className="px-4 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg transition-colors duration-200"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   Sửa
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={() => handleDeleteSP(sp.sanpham_id)}
-                  className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+                  className={`px-4 py-1.5 rounded-lg text-white font-medium ${
+                    feth_deleteSP.isLoading
+                      ? "bg-red-300 cursor-not-allowed"
+                      : "bg-red-500 hover:bg-red-600"
+                  } transition-colors duration-200`}
+                  disabled={feth_deleteSP.isLoading}
+                  whileHover={{ scale: feth_deleteSP.isLoading ? 1 : 1.05 }}
+                  whileTap={{ scale: feth_deleteSP.isLoading ? 1 : 0.95 }}
                 >
-                  Xóa
-                </button>
+                  {feth_deleteSP.isLoading ? "Đang xóa..." : "Xóa"}
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
 
-      {/* Modal hiện đại */}
-      {isAddSP && (
-        <div className="fixed inset-0 flex justify-center items-center overflow-y-auto pt-20 z-50 pointer-events-none">
-          <div className="bg-white shadow-2xl rounded-3xl w-full max-w-md p-8 pointer-events-auto animate-slideDown">
-            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-              {editingSP ? "Sửa sản phẩm" : "Thêm sản phẩm"}
-            </h2>
+      {/* Modal thêm sản phẩm */}
+      <AnimatePresence>
+        {isAddSP && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 mx-4"
+            >
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                Thêm sản phẩm
+              </h2>
 
-            <form onSubmit={handleSubmit(handelAddSP)} className="space-y-4">
-              <input
-                {...register("ten_sanpham", { required: true })}
-                type="text"
-                placeholder="Tên sản phẩm"
-                className="w-full border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              />
-              {errors.ten_sanpham && (
-                <p className="text-red-500 text-sm">Tên sản phẩm bắt buộc</p>
-              )}
+              <div className="space-y-5">
+                <div>
+                  <motion.input
+                    {...register("ten_sanpham", { required: true })}
+                    type="text"
+                    placeholder="Tên sản phẩm"
+                    className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50"
+                    whileFocus={{ scale: 1.02 }}
+                  />
+                  {errors.ten_sanpham && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Tên sản phẩm bắt buộc
+                    </p>
+                  )}
+                </div>
 
-              <input
-                type="text"
-                value={giaBanInput}
-                onChange={handleGiaBanChange}
-                placeholder="Giá bán"
-                className="w-full border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              />
-              {errors.gia_ban && (
-                <p className="text-red-500 text-sm">Giá hợp lệ bắt buộc</p>
-              )}
+                <motion.input
+                  type="text"
+                  value={giaBanInput}
+                  onChange={handleGiaBanChange}
+                  placeholder="Giá bán"
+                  className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50"
+                  whileFocus={{ scale: 1.02 }}
+                />
 
-              <textarea
-                {...register("mo_ta")}
-                placeholder="Mô tả"
-                className="w-full border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              ></textarea>
+                <motion.textarea
+                  {...register("mo_ta")}
+                  placeholder="Mô tả"
+                  className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50 resize-none h-24"
+                  whileFocus={{ scale: 1.02 }}
+                />
 
-              <input
-                {...register("so_luong_ton", { required: true, min: 0 })}
-                type="number"
-                placeholder="Số lượng tồn"
-                className="w-full border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              />
-              {errors.so_luong_ton && (
-                <p className="text-red-500 text-sm">Số lượng hợp lệ bắt buộc</p>
-              )}
+                <div>
+                  <motion.input
+                    {...register("so_luong_ton", { required: true, min: 0 })}
+                    type="number"
+                    placeholder="Số lượng tồn"
+                    className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50"
+                    whileFocus={{ scale: 1.02 }}
+                  />
+                  {errors.so_luong_ton && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Số lượng tồn bắt buộc và phải lớn hơn hoặc bằng 0
+                    </p>
+                  )}
+                </div>
 
-              <select
-                {...register("loai_sanpham", { required: true })}
-                className="w-full border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              >
-                <option value="">Chọn loại sản phẩm</option>
-                <option value="dien_thoai">Điện thoại</option>
-                <option value="may_tinh">Máy tính</option>
-                <option value="phu_kien">Phụ kiện</option>
-                <option value="thoi_trang">Thời trang</option>
-              </select>
-              {errors.loai_sanpham && (
-                <p className="text-red-500 text-sm">
-                  Vui lòng chọn loại sản phẩm
-                </p>
-              )}
+                <div>
+                  <motion.select
+                    {...register("loai_sanpham", { required: true })}
+                    className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50"
+                    whileFocus={{ scale: 1.02 }}
+                  >
+                    <option value="">Chọn loại sản phẩm</option>
+                    <option value="dien_thoai">Điện thoại</option>
+                    <option value="may_tinh">Máy tính</option>
+                    <option value="phu_kien">Phụ kiện</option>
+                    <option value="thoi_trang">Thời trang</option>
+                  </motion.select>
+                  {errors.loai_sanpham && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Loại sản phẩm bắt buộc
+                    </p>
+                  )}
+                </div>
 
-              <input
-                {...register("nha_cung_cap", { required: true })}
-                type="text"
-                placeholder="Nhà cung cấp"
-                className="w-full border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              />
-              {errors.nha_cung_cap && (
-                <p className="text-red-500 text-sm">Nhà cung cấp bắt buộc</p>
-              )}
+                <div>
+                  <motion.input
+                    {...register("nha_cung_cap", { required: true })}
+                    type="text"
+                    placeholder="Nhà cung cấp"
+                    className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50"
+                    whileFocus={{ scale: 1.02 }}
+                  />
+                  {errors.nha_cung_cap && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Nhà cung cấp bắt buộc
+                    </p>
+                  )}
+                </div>
 
-              <input
-                type="file"
-                onChange={(e) => setUrlSanpham(e.target.files[0])}
-                className="w-full border border-gray-200 p-2 rounded-xl"
-              />
+                <motion.input
+                  type="file"
+                  onChange={(e) => setUrlSanpham(e.target.files[0])}
+                  className="w-full p-2.5 rounded-lg border border-gray-200 file:bg-blue-50 file:border-0 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:text-blue-700 hover:file:bg-blue-100 transition-all duration-200"
+                  whileHover={{ scale: 1.02 }}
+                />
 
-              <select
-                {...register("kho_id", { required: true })}
-                className="w-full border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-              >
-                <option value="">Chọn kho</option>
-                {kho.map((item) => (
-                  <option key={item.kho_id} value={item.kho_id}>
-                    {item.ten_kho} - {item.dia_chi}
-                  </option>
-                ))}
-              </select>
-              {errors.kho_id && (
-                <p className="text-red-500 text-sm">Vui lòng chọn kho</p>
-              )}
+                <div>
+                  <motion.select
+                    {...register("kho_id", { required: true })}
+                    className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50"
+                    whileFocus={{ scale: 1.02 }}
+                  >
+                    <option value="">Chọn kho</option>
+                    {kho.map((item) => (
+                      <option key={item.kho_id} value={item.kho_id}>
+                        {item.ten_kho} - {item.dia_chi}
+                      </option>
+                    ))}
+                  </motion.select>
+                  {errors.kho_id && (
+                    <p className="text-red-500 text-sm mt-1">Kho bắt buộc</p>
+                  )}
+                </div>
 
-              <div className="flex justify-end gap-4 mt-4">
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-gray-200 rounded-xl hover:bg-gray-300 transition"
-                  onClick={() => {
-                    setIsAddSP(false);
-                    setEditingSP(null);
-                  }}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className={`px-4 py-2 rounded-xl text-white ${
-                    loading
-                      ? "bg-blue-300 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700"
-                  }`}
-                  disabled={loading}
-                >
-                  {loading ? "Đang lưu..." : "Lưu"}
-                </button>
+                <div className="flex justify-end gap-4 mt-6">
+                  <motion.button
+                    type="button"
+                    className="px-5 py-2.5 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
+                    onClick={() => setIsAddSP(false)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Hủy
+                  </motion.button>
+                  <motion.button
+                    type="submit"
+                    className={`px-5 py-2.5 rounded-lg text-white font-medium ${
+                      loading
+                        ? "bg-blue-300 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    } transition-colors duration-200`}
+                    disabled={loading}
+                    onClick={handleSubmit(handelAddSP)}
+                    whileHover={{ scale: loading ? 1 : 1.05 }}
+                    whileTap={{ scale: loading ? 1 : 0.95 }}
+                  >
+                    {loading ? "Đang lưu..." : "Lưu"}
+                  </motion.button>
+                </div>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* CSS animation */}
-      <style>{`
-        @keyframes slideDown {
-          0% { opacity: 0; transform: translateY(-20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .animate-slideDown {
-          animation: slideDown 0.3s ease-out forwards;
-        }
-      `}</style>
+      {/* Modal sửa sản phẩm */}
+      <AnimatePresence>
+        {editingSP && (
+          <SuaSanpham
+            sanpham={editingSP}
+            onClose={() => setEditingSP(null)}
+            onUpdated={fetchSanpham}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

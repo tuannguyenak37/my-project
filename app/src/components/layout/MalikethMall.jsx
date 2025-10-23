@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import api_SP from "../../utils/API/sanpham.js";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function MalikethMall() {
   const [SP4, setSP4] = useState([]);
@@ -13,30 +14,29 @@ export default function MalikethMall() {
     mutationFn: () => api_SP.SP_client(),
     onSuccess: (res) => {
       setSP4(res.data.data);
-      console.log("dữ liệu", SP4);
+      console.log("Dữ liệu sản phẩm giảm giá:", res.data.data);
     },
-    onError: (error) => console.error("❌ Lỗi khi gọi API:", error),
+    onError: (error) => console.error("❌ Lỗi khi gọi API SP_client:", error),
   });
 
   // API: Sản phẩm gợi ý ngẫu nhiên
   const handelrandom20 = useMutation({
     mutationFn: () => api_SP.random20(),
     onSuccess: (res) => setRandom20(res.data.data),
-    onError: (error) => console.error("❌ Lỗi khi gọi API:", error),
+    onError: (error) => console.error("❌ Lỗi khi gọi API random20:", error),
   });
 
   // API: Sản phẩm bán chạy
   const { mutate: bestseller } = useMutation({
     mutationFn: () => api_SP.bestseller(),
     onSuccess: (res) => setbestseller4(res.data.data),
-    onError: (error) => console.error("❌ Lỗi khi gọi API:", error),
+    onError: (error) => console.error("❌ Lỗi khi gọi API bestseller:", error),
   });
 
   // Gọi API khi component mount
   useEffect(() => {
     xem_SP();
     bestseller();
-
     handelrandom20.mutate();
   }, []);
 
@@ -46,148 +46,186 @@ export default function MalikethMall() {
     "0 ₫";
 
   return (
-    <div className="mt-4 mx-3">
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       {/* --- Phần giới thiệu chính --- */}
-      <div className="shadow-lg rounded-2xl bg-white p-6 m-4 w-full">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-blue-600 mb-3">
-            Maliketh MALL
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Nơi mua sắm trực tuyến với nhiều ưu đãi hấp dẫn. Khám phá ngay các
-            sản phẩm mới nhất!
-          </p>
-          <button className="w-full md:w-auto bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700 transition">
-            Khám phá ngay
-          </button>
-        </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white rounded-2xl shadow-lg p-8 mb-8 max-w-7xl mx-auto"
+      >
+        <h2 className="text-4xl font-bold text-gray-900 mb-4">Maliketh MALL</h2>
+        <p className="text-gray-600 text-lg mb-6 max-w-2xl">
+          Nơi mua sắm trực tuyến với những ưu đãi hấp dẫn. Khám phá ngay các sản
+          phẩm mới nhất và độc đáo!
+        </p>
+        <motion.button
+          className="bg-blue-600 text-white py-2.5 px-8 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Khám phá ngay
+        </motion.button>
+      </motion.div>
 
-        {/* --- Danh sách sản phẩm giảm giá --- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {SP4.map((item) => (
-            <div
-              className="bg-gray-50 rounded-xl shadow-md p-3 text-center"
-              key={item.sanpham_id}
-            >
-              <h1 className="text-lg font-semibold text-red-500 mb-2">
-                🔥 Giảm giá
-              </h1>
-              <div className="aspect-[4/3] w-full bg-white rounded-2xl border border-gray-300 shadow-md flex items-center justify-center overflow-hidden">
-                <img
-                  src={item.url_sanpham}
-                  alt={item.ten_sanpham}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              <h2 className="text-base font-semibold text-gray-800 mt-2">
-                {item.ten_sanpham}
-              </h2>
-              <p className="text-sm line-through text-gray-400">250.000 ₫</p>
-              <p className="text-lg font-bold text-red-600">
-                {formatVND(item.gia_ban)}
-              </p>
-              <Link
-                to={`/product/${item.sanpham_id}`}
-                className="mt-2 w-full bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600 transition"
-              >
-                Mua ngay
-              </Link>
+      {/* --- Danh sách sản phẩm giảm giá --- */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="bg-white rounded-2xl shadow-lg p-8 mb-8 max-w-7xl mx-auto"
+      >
+        <h2 className="text-2xl font-bold text-red-600 mb-6">
+          🔥 Sản phẩm giảm giá
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {SP4.length === 0 ? (
+            <div className="col-span-full text-center text-gray-500 py-8">
+              Đang tải sản phẩm...
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* --- Sản phẩm bán chạy --- */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mt-5">
-        <h1 className="text-2xl font-bold text-orange-500 mb-6 text-center">
-          🏆 Sản phẩm bán chạy hàng đầu 😍
-        </h1>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {bestseller4.map((item) => (
-            <div
-              key={item.sanpham_id}
-              className="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 group"
-            >
-              <div className="relative w-full h-36 overflow-hidden">
-                <img
-                  src={item.url_sanpham}
-                  alt={item.ten_sanpham}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
-                  HOT 🔥
+          ) : (
+            SP4.map((item) => (
+              <motion.div
+                key={item.sanpham_id}
+                className="bg-gray-50 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="relative h-48 bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
+                  <img
+                    src={item.url_sanpham}
+                    alt={item.ten_sanpham}
+                    className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                    Giảm giá
+                  </span>
                 </div>
-              </div>
-
-              <div className="p-3 text-center">
-                <h2 className="text-base font-semibold text-gray-800 truncate">
+                <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 mb-2">
                   {item.ten_sanpham}
-                </h2>
-                <p className="text-lg font-bold text-red-600 mt-1">
+                </h3>
+                <p className="text-sm line-through text-gray-400 mb-1">
+                  {formatVND(item.gia_ban * 1.2)}
+                </p>
+                <p className="text-lg font-bold text-red-600">
                   {formatVND(item.gia_ban)}
                 </p>
-
                 <Link
                   to={`/product/${item.sanpham_id}`}
-                  className="mt-3 w-full bg-orange-500 text-white py-1.5 px-3 rounded-xl font-medium hover:bg-orange-600 transition-colors duration-300"
+                  className="mt-3 block w-full bg-red-500 text-white py-2 rounded-lg font-medium hover:bg-red-600 transition-colors duration-200 text-center"
                 >
                   Mua ngay
                 </Link>
-              </div>
-            </div>
-          ))}
+              </motion.div>
+            ))
+          )}
         </div>
-      </div>
+      </motion.div>
+
+      {/* --- Sản phẩm bán chạy --- */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="bg-white rounded-2xl shadow-lg p-8 mb-8 max-w-7xl mx-auto"
+      >
+        <h2 className="text-2xl font-bold text-orange-600 mb-6">
+          🏆 Sản phẩm bán chạy hàng đầu
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {bestseller4.length === 0 ? (
+            <div className="col-span-full text-center text-gray-500 py-8">
+              Đang tải sản phẩm...
+            </div>
+          ) : (
+            bestseller4.map((item) => (
+              <motion.div
+                key={item.sanpham_id}
+                className="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 border border-gray-100"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="relative h-48 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden mb-4">
+                  <img
+                    src={item.url_sanpham}
+                    alt={item.ten_sanpham}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                    HOT 🔥
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 mb-2">
+                  {item.ten_sanpham}
+                </h3>
+                <p className="text-lg font-bold text-orange-600">
+                  {formatVND(item.gia_ban)}
+                </p>
+                <Link
+                  to={`/product/${item.sanpham_id}`}
+                  className="mt-3 block w-full bg-orange-500 text-white py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors duration-200 text-center"
+                >
+                  Mua ngay
+                </Link>
+              </motion.div>
+            ))
+          )}
+        </div>
+      </motion.div>
 
       {/* --- Sản phẩm gợi ý --- */}
-      <div className="shadow-lg rounded-2xl bg-white p-6 m-4 w-full">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-blue-600 mb-3">
-            Maliketh MALL ❤️ Sản phẩm gợi ý cho bạn
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Không biết mua gì? Hãy thử xem những gợi ý dưới đây nhé!
-          </p>
-          <button className="w-full md:w-auto bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700 transition">
-            Khám phá ngay
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {random20.map((item) => (
-            <div
-              className="bg-gray-50 rounded-xl shadow-md p-3 text-center"
-              key={item.sanpham_id}
-            >
-              <h1 className="text-lg font-semibold text-red-500 mb-2">
-                💕 Gợi ý cho bạn
-              </h1>
-              <div className="aspect-[4/3] w-full bg-white rounded-2xl border border-gray-300 shadow-md flex items-center justify-center overflow-hidden">
-                <img
-                  src={item.url_sanpham}
-                  alt={item.ten_sanpham}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              <h2 className="text-base font-semibold text-gray-800 mt-2">
-                {item.ten_sanpham}
-              </h2>
-              <p className="text-lg font-bold text-red-600">
-                {formatVND(item.gia_ban)}
-              </p>
-              <Link
-                to={`/product/${item.sanpham_id}`}
-                className="mt-2 w-full bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600 transition"
-              >
-                Mua ngay
-              </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+        className="bg-white rounded-2xl shadow-lg p-8 max-w-7xl mx-auto"
+      >
+        <h2 className="text-2xl font-bold text-blue-600 mb-4">
+          ❤️ Sản phẩm gợi ý cho bạn
+        </h2>
+        <p className="text-gray-600 text-lg mb-6 max-w-2xl">
+          Không biết mua gì? Hãy thử xem những gợi ý dưới đây nhé!
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {random20.length === 0 ? (
+            <div className="col-span-full text-center text-gray-500 py-8">
+              Đang tải sản phẩm...
             </div>
-          ))}
+          ) : (
+            random20.map((item) => (
+              <motion.div
+                key={item.sanpham_id}
+                className="bg-gray-50 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="relative h-48 bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
+                  <img
+                    src={item.url_sanpham}
+                    alt={item.ten_sanpham}
+                    className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <span className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                    Gợi ý
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 mb-2">
+                  {item.ten_sanpham}
+                </h3>
+                <p className="text-lg font-bold text-blue-600">
+                  {formatVND(item.gia_ban)}
+                </p>
+                <Link
+                  to={`/product/${item.sanpham_id}`}
+                  className="mt-3 block w-full bg-blue-500 text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200 text-center"
+                >
+                  Mua ngay
+                </Link>
+              </motion.div>
+            ))
+          )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

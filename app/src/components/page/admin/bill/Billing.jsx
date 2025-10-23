@@ -3,6 +3,8 @@ import NagiveAdmin from "../nagiveadmin";
 import apibill from "../../../../utils/API/bill/bill.js";
 import toast from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
+import BillDetail from "./BillDetail.jsx";
 
 const statusLabels = {
   "chờ xử lý": "Chờ xác nhận",
@@ -22,10 +24,7 @@ const statusColors = {
   "trả hàng/hoàn tiền": "bg-purple-100 text-purple-800",
 };
 
-// Flow admin được phép thay đổi
 const statusFlowAdmin = ["chờ xử lý", "đang xử lý", "đang vận chuyển"];
-
-// Quy trình trạng thái hợp lệ
 const statusFlow = ["chờ xử lý", "đang xử lý", "đang vận chuyển", "đã giao"];
 
 export default function Billing() {
@@ -52,9 +51,7 @@ export default function Billing() {
   const updatebill = useMutation({
     mutationFn: ({ hoadon_id, trang_thai }) =>
       apibill.updatebill({ hoadon_id, trang_thai }),
-
     onSuccess: (data, variables) => {
-      // variables = { hoadon_id, trang_thai: newStatus }
       toast.success("Cập nhật trạng thái thành công");
       setBills((prevBills) =>
         prevBills.map((b) =>
@@ -76,7 +73,6 @@ export default function Billing() {
     const currentIndex = statusFlow.indexOf(currentStatus);
     const newIndex = statusFlow.indexOf(trang_thai);
     if (newIndex <= currentIndex) return;
-    console.log("data dự định ", currentStatus, trang_thai);
     setUpdatingId(hoadon_id);
     updatebill.mutate(
       { hoadon_id, trang_thai },
@@ -97,87 +93,114 @@ export default function Billing() {
   }, [bills, filterStatus, search]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50">
       <NagiveAdmin />
 
-      <div className="flex-1 p-4 md:p-6 overflow-x-auto">
-        <h1 className="text-2xl md:text-3xl font-bold mb-4 text-red-800">
+      <div className="flex-1 p-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">
           Quản lý hóa đơn
         </h1>
 
-        {/* Filter & Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <div className="flex flex-wrap gap-2 overflow-x-auto">
-            <button
+        {/* Bộ lọc và tìm kiếm */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div className="flex flex-wrap gap-3">
+            <motion.button
               onClick={() => setFilterStatus("tất cả")}
-              className={`px-3 py-1 rounded-full border ${
+              className={`px-4 py-2 rounded-lg font-medium ${
                 filterStatus === "tất cả"
-                  ? "bg-red-700 text-white border-red-700"
-                  : "bg-white text-gray-700 border-gray-300"
-              }`}
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              } transition-colors duration-200`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Tất cả
-            </button>
+            </motion.button>
             {Object.keys(statusLabels).map((status) => (
-              <button
+              <motion.button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1 rounded-full border ${
+                className={`px-4 py-2 rounded-lg font-medium ${
                   filterStatus === status
-                    ? "bg-red-700 text-white border-red-700"
-                    : "bg-white text-gray-700 border-gray-300"
-                }`}
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                } transition-colors duration-200`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {statusLabels[status]}
-              </button>
+              </motion.button>
             ))}
           </div>
 
-          <input
+          <motion.input
             type="text"
             placeholder="Tìm theo hóa đơn hoặc khách hàng..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border rounded px-3 py-1 w-full sm:w-64"
+            className="p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50 w-full sm:w-64"
+            whileFocus={{ scale: 1.02 }}
           />
         </div>
 
-        {/* Table */}
+        {/* Bảng hóa đơn */}
         {loading ? (
-          <div className="text-center text-gray-600">Đang tải hóa đơn...</div>
+          <div className="text-center text-gray-600 py-8">
+            Đang tải hóa đơn...
+          </div>
         ) : filteredBills.length === 0 ? (
-          <div className="text-center text-gray-600">Không có hóa đơn</div>
+          <div className="text-center text-gray-600 py-8">Không có hóa đơn</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse border border-gray-200 text-sm md:text-base">
+            <table className="w-full border-collapse text-sm md:text-base">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="border px-2 py-2 text-left">Hóa đơn ID</th>
-                  <th className="border px-2 py-2 text-left">Khách hàng</th>
-                  <th className="border px-2 py-2 text-left">Ngày lập</th>
-                  <th className="border px-2 py-2 text-left">Tổng tiền</th>
-                  <th className="border px-2 py-2 text-left">Thanh toán</th>
-                  <th className="border px-2 py-2 text-left">Trạng thái</th>
-                  <th className="border px-2 py-2 text-left">Ghi chú</th>
-                  <th className="border px-2 py-2 text-left">Hành động</th>
+                  <th className="border border-gray-200 p-3 text-left font-semibold">
+                    Hóa đơn ID
+                  </th>
+                  <th className="border border-gray-200 p-3 text-left font-semibold">
+                    Khách hàng
+                  </th>
+                  <th className="border border-gray-200 p-3 text-left font-semibold">
+                    Ngày lập
+                  </th>
+                  <th className="border border-gray-200 p-3 text-left font-semibold">
+                    Tổng tiền
+                  </th>
+                  <th className="border border-gray-200 p-3 text-left font-semibold">
+                    Thanh toán
+                  </th>
+                  <th className="border border-gray-200 p-3 text-left font-semibold">
+                    Trạng thái
+                  </th>
+                  <th className="border border-gray-200 p-3 text-left font-semibold">
+                    Ghi chú
+                  </th>
+                  <th className="border border-gray-200 p-3 text-left font-semibold">
+                    Hành động
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredBills.map((bill) => (
-                  <tr key={bill.hoadon_id} className="hover:bg-gray-50">
-                    <td className="border px-2 py-2">{bill.hoadon_id}</td>
-                    <td className="border px-2 py-2">{bill.khachhang_id}</td>
-                    <td className="border px-2 py-2">
+                  <motion.tr
+                    key={bill.hoadon_id}
+                    className="hover:bg-gray-50"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <td className="border p-3">{bill.hoadon_id}</td>
+                    <td className="border p-3">{bill.khachhang_id}</td>
+                    <td className="border p-3">
                       {new Date(bill.ngay_lap).toLocaleString()}
                     </td>
-                    <td className="border px-2 py-2">
+                    <td className="border p-3">
                       {bill.tong_tien.toLocaleString()} đ
                     </td>
-                    <td className="border px-2 py-2">
-                      {bill.hinh_thuc_thanh_toan}
-                    </td>
-                    <td className="border px-2 py-2">
-                      <select
+                    <td className="border p-3">{bill.hinh_thuc_thanh_toan}</td>
+                    <td className="border p-3">
+                      <motion.select
                         disabled={
                           updatingId === bill.hoadon_id ||
                           !statusFlowAdmin.includes(bill.trang_thai) ||
@@ -191,14 +214,11 @@ export default function Billing() {
                             e.target.value
                           )
                         }
-                        className={`px-2 py-1 rounded-full text-sm font-semibold cursor-pointer ${statusColors[bill.trang_thai]}`}
+                        className={`px-3 py-1.5 rounded-lg font-semibold text-sm cursor-pointer ${statusColors[bill.trang_thai]} focus:ring-2 focus:ring-blue-500 outline-none`}
                       >
-                        {/* Luôn show trạng thái hiện tại */}
                         <option value={bill.trang_thai} disabled>
                           {statusLabels[bill.trang_thai]}
                         </option>
-
-                        {/* Chỉ show trạng thái tiếp theo hợp lệ */}
                         {statusFlowAdmin
                           .filter(
                             (status) =>
@@ -210,68 +230,42 @@ export default function Billing() {
                               {statusLabels[status]}
                             </option>
                           ))}
-                      </select>
+                      </motion.select>
                     </td>
-                    <td className="border px-2 py-2">{bill.ghi_chu || "-"}</td>
-                    <td className="border px-2 py-2">
-                      <button
+                    <td className="border p-3">{bill.ghi_chu || "-"}</td>
+                    <td className="border p-3 text-center">
+                      <motion.button
                         onClick={() => setSelectedBill(bill)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                        className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         Xem
-                      </button>
+                      </motion.button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
 
-        {/* Modal chi tiết hóa đơn */}
-        {selectedBill && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-lg w-full p-6 relative overflow-y-auto max-h-[90vh]">
-              <button
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-                onClick={() => setSelectedBill(null)}
-              >
-                ✕
-              </button>
-              <h2 className="text-xl font-bold mb-4">Chi tiết hóa đơn</h2>
-              <p>
-                <strong>Hóa đơn ID:</strong> {selectedBill.hoadon_id}
-              </p>
-              <p>
-                <strong>Khách hàng:</strong> {selectedBill.khachhang_id}
-              </p>
-              <p>
-                <strong>Ngày lập:</strong>{" "}
-                {new Date(selectedBill.ngay_lap).toLocaleString()}
-              </p>
-              <p>
-                <strong>Tổng tiền:</strong>{" "}
-                {selectedBill.tong_tien.toLocaleString()} đ
-              </p>
-              <p>
-                <strong>Thanh toán:</strong> {selectedBill.hinh_thuc_thanh_toan}
-              </p>
-              <p>
-                <strong>Trạng thái:</strong>{" "}
-                <span
-                  className={`px-2 py-1 rounded-full text-sm font-semibold ${statusColors[selectedBill.trang_thai]}`}
-                >
-                  {statusLabels[selectedBill.trang_thai]}
-                </span>
-              </p>
-              {selectedBill.ghi_chu && (
-                <p>
-                  <strong>Ghi chú:</strong> {selectedBill.ghi_chu}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
+        {/* ✅ Modal chi tiết hóa đơn (đã tích hợp BillDetail.jsx) */}
+        <AnimatePresence>
+          {selectedBill && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            >
+              <BillDetail
+                hoadon_id={selectedBill.hoadon_id}
+                onClose={() => setSelectedBill(null)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -34,4 +34,5 @@ export default [
     [route("billing", "./src/components/page/dashborad_user/Billing.jsx")]
   ),
   route("/shearch/:keyword", "./src/components/ui/shearch/Sheacrch_Detail.jsx"),
+  route("/profile", "./src/components/page/profile/Profile.jsx"),
 ] satisfies RouteConfig;

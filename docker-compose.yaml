@@ -1,8 +1,13 @@
 services:
   frontend:
-    build: ./
+    build:
+      context: . # thư mục chứa Dockerfile và React code
+      dockerfile: Dockerfile
+    container_name: frontend
     ports:
-      - "5173:80"
+      - "5173:80" # truy cập http://localhost:5173
+    restart: always
+
     env_file:
       - .env.docker
     networks:

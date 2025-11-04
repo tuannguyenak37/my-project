@@ -2,13 +2,15 @@ import React, { useState, useMemo, useEffect } from "react";
 import bill from "../../../utils/API/bill/bill";
 import { useMutation } from "@tanstack/react-query";
 import BillDetail from "./BillDetail";
-import {
-  EyeOutlined,
-  CheckCircleOutlined,
-  UndoOutlined,
-} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import { motion } from "framer-motion";
+import {
+  FaEye,
+  FaCheckCircle,
+  FaUndo,
+  FaSearch,
+  FaFilter,
+} from "react-icons/fa";
 
 const statusColors = {
   "chờ xử lý": {
@@ -22,9 +24,9 @@ const statusColors = {
     dot: "bg-blue-500",
   },
   "đang vận chuyển": {
-    bg: "bg-purple-100",
-    text: "text-purple-700",
-    dot: "bg-purple-500",
+    bg: "bg-indigo-100",
+    text: "text-indigo-700",
+    dot: "bg-indigo-500",
   },
   "đã giao": {
     bg: "bg-green-100",
@@ -102,9 +104,9 @@ export default function InvoiceCards() {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen font-roboto">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Đơn hàng của tôi</h1>
+    <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen font-roboto">
+      <header className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-blue-700">Đơn hàng của tôi</h1>
         <p className="text-gray-500 text-sm mt-1">
           Theo dõi và quản lý các đơn hàng của bạn
         </p>
@@ -112,45 +114,36 @@ export default function InvoiceCards() {
 
       {/* Search + Filter */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <div className="relative w-full sm:w-80">
+        <div className="relative w-full sm:w-96">
+          <FaSearch className="absolute left-3 top-3 text-gray-400" />
           <input
             type="text"
             placeholder="Tìm kiếm mã đơn hàng, khách hàng..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
           />
-          <svg
-            className="absolute left-3 top-3 h-5 w-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
         </div>
         <div className="flex gap-2">
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            {Object.keys(statusColors).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-1">
+            <FaFilter className="text-blue-500" />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tất cả trạng thái</option>
+              {Object.keys(statusColors).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
           <select
             value={filterPayment}
             onChange={(e) => setFilterPayment(e.target.value)}
-            className="px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="px-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Tất cả thanh toán</option>
             <option value="cod">COD</option>
@@ -174,13 +167,14 @@ export default function InvoiceCards() {
             return (
               <motion.div
                 key={inv.hoadon_id}
-                className="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition"
-                whileHover={{ y: -3 }}
+                className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-xl transition-all"
+                whileHover={{ scale: 1.01 }}
+                layout
               >
-                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`w-2 h-2 rounded-full ${color.dot} inline-block`}
+                      className={`w-2 h-2 rounded-full ${color.dot}`}
                     ></span>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${color.bg} ${color.text}`}
@@ -189,12 +183,12 @@ export default function InvoiceCards() {
                     </span>
                   </div>
                   <span className="text-sm text-gray-500">
-                    Mã đơn: {inv.hoadon_id}
+                    Mã đơn: <strong>{inv.hoadon_id}</strong>
                   </span>
                 </div>
 
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-4">
+                <div className="p-5">
+                  <div className="flex justify-between items-start mb-3">
                     <div>
                       <p className="text-gray-600 text-sm">
                         <strong>Khách hàng:</strong> {inv.khachhang_id}
@@ -210,7 +204,7 @@ export default function InvoiceCards() {
                       })}
                     </p>
                   </div>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-3">
                     <p className="text-gray-600 text-sm">
                       <strong>Thanh toán:</strong>{" "}
                       {inv.hinh_thuc_thanh_toan.toUpperCase()}
@@ -225,7 +219,7 @@ export default function InvoiceCards() {
                   </p>
 
                   <div className="flex justify-between items-center">
-                    <p className="text-lg font-bold text-orange-600">
+                    <p className="text-xl font-bold text-blue-600">
                       {inv.tong_tien.toLocaleString("vi-VN")} VND
                     </p>
                     <div className="flex gap-2">
@@ -237,37 +231,44 @@ export default function InvoiceCards() {
                               : inv.hoadon_id
                           )
                         }
-                        className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm flex items-center gap-2"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-sm flex items-center gap-2 transition"
                       >
-                        <EyeOutlined />
+                        <FaEye />
                         Xem chi tiết
                       </button>
                       {inv.trang_thai === "đang vận chuyển" && (
                         <button
                           onClick={() => handleConfirm(inv.hoadon_id)}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm flex items-center gap-2"
+                          className="px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 text-sm flex items-center gap-2 transition"
                         >
-                          <CheckCircleOutlined />
+                          <FaCheckCircle />
                           Đã nhận hàng
                         </button>
                       )}
                       {inv.trang_thai === "đã giao" && (
                         <button
                           onClick={() => handleRefund(inv.hoadon_id)}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm flex items-center gap-2"
+                          className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 text-sm flex items-center gap-2 transition"
                         >
-                          <UndoOutlined />
+                          <FaUndo />
                           Trả hàng / Hoàn tiền
                         </button>
                       )}
                     </div>
                   </div>
 
-                  {selectedBill === inv.hoadon_id && (
-                    <div className="mt-4 border-t pt-4">
-                      <BillDetail hoadon_id={inv.hoadon_id} />
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {selectedBill === inv.hoadon_id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-4 border-t pt-4 overflow-hidden"
+                      >
+                        <BillDetail hoadon_id={inv.hoadon_id} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             );

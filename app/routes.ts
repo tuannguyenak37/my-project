@@ -11,6 +11,7 @@ export default [
   route("sanpham", "./src/components/page/admin/Sanpham.jsx"),
   route("kho", "./src/components/page/admin/Kho.jsx"),
   route("/product/:id", "./src/components/page/ProductDetail.jsx"),
+  route("/pageshop/:id", "./src/components/page/PageShop.jsx"),
   route("/shop", "./src/components/layout/CrateShop.jsx"),
   route("/cart", "./src/components/page/Cart.jsx"),
   route("/checkout", "./src/components/page/checkout.jsx"),

@@ -1,47 +1,42 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import "react-toastify/dist/ReactToastify.css";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  addToCart,
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-  toggleSelect,
-} from "../../redux/slices/cart.js";
-import chekoutAPI from "../../utils/API/checkout";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { removeFromCart } from "../../redux/slices/cart.js";
+import checkoutAPI from "../../utils/API/checkout.js";
 import CustomerInfoForm from "../ui/checkout/CustomerInfoForm.jsx";
 import ProductList from "../ui/checkout/ProductList.jsx";
 import OrderSummary from "../ui/checkout/OrderSummary.jsx";
 import PaymentMethod from "../ui/checkout/PaymentMethod.jsx";
-import { useNavigate } from "react-router-dom";
+import SendOtpPopup from "../ui/email/send_otp.jsx";
+import {
+  setPopupVisible,
+  setPendingOrderData,
+  clearOtpState,
+} from "../../redux/slices/otpSlice.js";
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { popupVisible, verified, pendingOrderData } = useSelector(
+    (state) => state.otp
+  );
+
   const savedProducts = sessionStorage.getItem("productsToCheckout");
   const productsToCheckout = useMemo(
     () => (savedProducts ? JSON.parse(savedProducts) : []),
     [savedProducts]
   );
-  //  lấy redux
-  const dispatch = useDispatch();
-  const cart = useSelector((sate) => sate.cart.items);
-  const handelremovecart = (id) => {
-    dispatch(removeFromCart(id));
-  };
-  // ✅ Thêm formState.errors
+
   const {
     handleSubmit,
     register,
     watch,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      shopNotes: {},
-    },
-  });
+  } = useForm({ defaultValues: { shopNotes: {} } });
 
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [summary, setSummary] = useState({
@@ -50,6 +45,8 @@ const Checkout = () => {
     total: 0,
   });
   const [perShopTotals, setPerShopTotals] = useState([]);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const hasTriggeredPayment = useRef(false);
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("vi-VN", {
@@ -57,7 +54,7 @@ const Checkout = () => {
       currency: "VND",
     }).format(amount);
 
-  // ✅ Gom nhóm sản phẩm theo shop
+  // 🏪 Gom sản phẩm theo shop
   const groupedItems = useMemo(() => {
     const grouped = {};
     productsToCheckout.forEach((item) => {
@@ -72,10 +69,9 @@ const Checkout = () => {
     return grouped;
   }, [productsToCheckout]);
 
-  // ✅ Tính tổng tiền
+  // 📦 Tính tổng tiền
   useEffect(() => {
     if (!Object.keys(groupedItems).length) return;
-
     const perShop = Object.entries(groupedItems).map(([shopId, shop]) => {
       const subtotal = shop.items.reduce(
         (s, it) => s + Number(it.gia_ban || 0) * Number(it.so_luong || 0),
@@ -90,51 +86,47 @@ const Checkout = () => {
         total: subtotal + shipping,
       };
     });
-
     const subtotal = perShop.reduce((s, p) => s + p.subtotal, 0);
     const shipping = perShop.reduce((s, p) => s + p.shipping, 0);
     const total = perShop.reduce((s, p) => s + p.total, 0);
-
-    if (JSON.stringify(perShopTotals) !== JSON.stringify(perShop))
-      setPerShopTotals(perShop);
-    const newSummary = { subtotal, shipping, total };
-    if (JSON.stringify(summary) !== JSON.stringify(newSummary))
-      setSummary(newSummary);
+    setPerShopTotals(perShop);
+    setSummary({ subtotal, shipping, total });
   }, [groupedItems]);
 
-  const { mutate: checkout, isPending } = useMutation({
-    mutationFn: (data) => chekoutAPI.chekout_pay(data),
-    onSuccess: () => {
-      (toast.success("✅ Đặt hàng thành công! cảm ơn bạn đã mua hàng"),
-        navigate("/"));
+  // 💳 API thanh toán
+  const checkoutMutation = useMutation({
+    mutationFn: (data) => checkoutAPI.chekout_pay(data),
+    onMutate: () => {
+      setIsProcessingPayment(true);
     },
-
+    onSuccess: (data, variables) => {
+      toast.success("✅ Thanh toán thành công!");
+      variables.list_sanpham.forEach((sp) =>
+        dispatch(removeFromCart(sp.sanpham_id))
+      );
+      setTimeout(() => {
+        setIsProcessingPayment(false);
+        dispatch(clearOtpState());
+        navigate("/"); // ✅ hoặc "/"
+      }, 1500); // đợi animation 1.5s trước khi rời trang
+    },
     onError: (error) => {
-      toast.error("❌ Có lỗi xảy ra khi đặt hàng!");
-      console.error("❌ Lỗi :", error);
+      console.error("❌ Lỗi thanh toán:", error);
+      toast.error("❌ Có lỗi xảy ra khi thanh toán!");
+      setIsProcessingPayment(false);
     },
   });
 
-  // ✅ Kiểm tra dữ liệu thiếu trước khi gửi
+  // 🧾 Nhấn "Đặt hàng" → lưu đơn → bật OTP popup
   const onSubmit = (data) => {
-    if (!selectedAddress) {
-      toast.error("❌ Vui lòng chọn địa chỉ giao hàng!");
-      return;
-    }
+    if (!selectedAddress)
+      return toast.error("❌ Vui lòng chọn địa chỉ giao hàng!");
+    if (!data.paymentMethod)
+      return toast.error("❌ Vui lòng chọn phương thức thanh toán!");
+    if (productsToCheckout.length === 0)
+      return toast.error("❌ Giỏ hàng trống!");
 
-    if (!data.paymentMethod) {
-      toast.error("❌ Vui lòng chọn phương thức thanh toán!");
-      return;
-    }
-
-    if (productsToCheckout.length === 0) {
-      toast.error("❌ Giỏ hàng trống, không thể đặt hàng!");
-      return;
-    }
-
-    console.log("💳 Phương thức thanh toán:", data.paymentMethod);
     const shopNotes = watch("shopNotes") || {};
-
     const list_sanpham = perShopTotals.flatMap((p) => {
       const items = groupedItems[p.shopId]?.items || [];
       const ghiChuShop = shopNotes[p.shopId] || "";
@@ -152,24 +144,29 @@ const Checkout = () => {
       list_sanpham,
     };
 
-    checkout(orderData);
-    console.log("🧾 Dữ liệu đơn hàng gửi lên API:", orderData);
-
-    // Duyệt qua từng sản phẩm trong shop đó
-    for (const sp of orderData.list_sanpham) {
-      handelremovecart(sp.sanpham_id); // gọi hàm xóa từng sản phẩm
-    }
+    dispatch(setPendingOrderData(orderData));
+    dispatch(setPopupVisible(true));
   };
 
+  // 🔐 Khi OTP xác thực thành công → gọi API thanh toán tự động
+  useEffect(() => {
+    if (verified && pendingOrderData && !hasTriggeredPayment.current) {
+      hasTriggeredPayment.current = true;
+      checkoutMutation.mutate(pendingOrderData);
+    }
+  }, [verified, pendingOrderData]);
+
   return (
-    <div className="container mx-auto p-4 max-w-5xl bg-gray-100 min-h-screen">
-      <div className="flex items-center justify-between mb-4 bg-orange-500 p-4 rounded-sm">
+    <div className="relative container mx-auto p-4 max-w-5xl bg-gray-100 min-h-screen">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 bg-blue-500 p-4 rounded-sm">
         <h1 className="text-2xl font-bold text-white">Đặt Hàng</h1>
         <a href="/cart" className="text-white hover:underline text-sm">
           Quay lại giỏ hàng
         </a>
       </div>
 
+      {/* Nội dung checkout */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
@@ -179,20 +176,43 @@ const Checkout = () => {
               formatCurrency={formatCurrency}
               register={register}
             />
-            {/* ✅ Truyền errors vào PaymentMethod */}
             <PaymentMethod register={register} errors={errors} />
           </div>
-
           <div className="lg:col-span-1">
             <OrderSummary
               summary={summary}
               formatCurrency={formatCurrency}
               perShopTotals={perShopTotals}
-              isPending={isPending}
+              isPending={checkoutMutation.isPending}
             />
           </div>
         </div>
       </form>
+
+      {/* Popup OTP */}
+      {popupVisible && <SendOtpPopup />}
+
+      {/* 🌀 Overlay xử lý thanh toán */}
+      {isProcessingPayment && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-[9998] bg-black/60 flex flex-col items-center justify-center text-white"
+        >
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 120 }}
+            className="bg-white text-gray-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center"
+          >
+            <div className="loader mb-4 border-4 border-t-4 border-blue-500 w-12 h-12 rounded-full animate-spin"></div>
+            <h2 className="text-lg font-semibold">Đang xử lý thanh toán...</h2>
+            <p className="text-sm text-gray-500 mt-2">
+              Vui lòng chờ trong giây lát
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 };

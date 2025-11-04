@@ -33,6 +33,11 @@ type Pages = {
       "id": string;
     };
   };
+  "/pageshop/:id": {
+    params: {
+      "id": string;
+    };
+  };
   "/shop": {
     params: {};
   };
@@ -73,7 +78,7 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login" | "/dashboard" | "/billingadmin" | "/sanpham" | "/kho" | "/product/:id" | "/shop" | "/cart" | "/checkout" | "/security" | "/MalikethPolicy" | "/ReturnRefundPolicy" | "/TermsOfService" | "/dashboardUser" | "/dashboardUser/billing" | "/shearch/:keyword" | "/profile";
+    page: "/" | "/login" | "/dashboard" | "/billingadmin" | "/sanpham" | "/kho" | "/product/:id" | "/pageshop/:id" | "/shop" | "/cart" | "/checkout" | "/security" | "/MalikethPolicy" | "/ReturnRefundPolicy" | "/TermsOfService" | "/dashboardUser" | "/dashboardUser/billing" | "/shearch/:keyword" | "/profile";
   };
   "routes/home.tsx": {
     id: "routes/home";
@@ -102,6 +107,10 @@ type RouteFiles = {
   "./src/components/page/ProductDetail.jsx": {
     id: "src/components/page/ProductDetail";
     page: "/product/:id";
+  };
+  "./src/components/page/PageShop.jsx": {
+    id: "src/components/page/PageShop";
+    page: "/pageshop/:id";
   };
   "./src/components/layout/CrateShop.jsx": {
     id: "src/components/layout/CrateShop";

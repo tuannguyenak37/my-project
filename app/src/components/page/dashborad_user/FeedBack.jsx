@@ -170,7 +170,7 @@ export default function FeedBack({ sanpham_id, hoadon_id }) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-100 to-blue-800 text-white font-semibold hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
         >
           {isSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
         </button>

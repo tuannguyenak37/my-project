@@ -131,14 +131,7 @@ export default function Navbar() {
         </div>
 
         {/* Menu desktop */}
-        <div className="hidden lg:flex items-center space-x-6">
-          <Link to="/categories" className="text-gray-700 hover:text-blue-500">
-            Danh mục
-          </Link>
-          <Link to="/promotions" className="text-gray-700 hover:text-blue-500">
-            Khuyến mãi
-          </Link>
-        </div>
+        <div className="hidden lg:flex items-center space-x-6"></div>
 
         {/* User + Cart + Hamburger */}
         <div className="flex items-center space-x-4">

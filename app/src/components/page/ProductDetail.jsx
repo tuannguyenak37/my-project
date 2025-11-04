@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Nagigate from "../layout/nagigate.jsx";
 import { useMutation } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ import { useAddToCart } from "../shared/cart.jsx"; // ✅ import đúng hook
 import GetFeedback from "../shared/Getfeedback.jsx";
 import apiFeedback from "../../utils/API/bill/feedback.js";
 export default function ProductDetail() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [productDetail, setProductDetail] = useState(null);
   const [soLuong, setSoLuong] = useState(1);
@@ -180,7 +181,10 @@ export default function ProductDetail() {
               )}
             </div>
           </div>
-          <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
+          <button
+            onClick={() => navigate(`/pageshop/${productDetail.shop_id}`)}
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
             Xem shop
           </button>
         </div>

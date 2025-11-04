@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     ports:
-      - "5173:80" # truy cập http://localhost:5173
+      - "80:80" # truy cập http://localhost:5173
     restart: always
 
     env_file:

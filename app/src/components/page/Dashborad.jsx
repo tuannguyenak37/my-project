@@ -163,13 +163,15 @@ export default function Dashboard() {
           {/* Date Selector */}
           <motion.div
             variants={cardVariants}
-            className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 max-w-[60vh] mx-auto mb-10"
+            className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 max-w-4xl mx-auto mb-10"
           >
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-              Chọn khoảng thời gian
+            <h3 className="text-xl font-bold text-indigo-600 mb-6 text-center">
+              📅 Chọn khoảng thời gian
             </h3>
-            <div className="flex flex-col sm:flex-row items-end gap-4 justify-center">
-              <div className="flex-1">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+              {/* Ngày bắt đầu */}
+              <div className="flex flex-col">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Ngày bắt đầu
                 </label>
@@ -177,10 +179,12 @@ export default function Dashboard() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+                  className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
                 />
               </div>
-              <div className="flex-1">
+
+              {/* Ngày kết thúc */}
+              <div className="flex flex-col">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Ngày kết thúc
                 </label>
@@ -188,10 +192,11 @@ export default function Dashboard() {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+                  className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
                 />
               </div>
 
+              {/* Nút xác nhận */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -204,11 +209,12 @@ export default function Dashboard() {
                     );
                   fethdoanhthuthang.mutate({ startDate, endDate });
                 }}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300 font-medium"
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300 font-medium w-full"
               >
                 Xác nhận
               </motion.button>
 
+              {/* Nút reset */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -217,9 +223,9 @@ export default function Dashboard() {
                   setStartDate("");
                   setEndDate("");
                   fethdoanhthu.mutate({ startDate: today, endDate: today });
-                  fethdoanhthuthang.mutate({}); // Reset về dữ liệu mặc định
+                  fethdoanhthuthang.mutate({});
                 }}
-                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-300 font-medium"
+                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-300 font-medium w-full"
               >
                 Reset
               </motion.button>

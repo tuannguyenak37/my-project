@@ -6,6 +6,13 @@ import APISP from "../../utils/API/sanpham.js";
 import { useAddToCart } from "../shared/cart.jsx"; // ✅ import đúng hook
 import GetFeedback from "../shared/Getfeedback.jsx";
 import apiFeedback from "../../utils/API/bill/feedback.js";
+const formatVND = (number) => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(number);
+};
+
 export default function ProductDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -88,7 +95,7 @@ export default function ProductDetail() {
               {product.ten_sanpham}
             </h1>
             <p className="text-3xl font-bold text-red-500 mb-4">
-              {product.gia_ban}đ
+              {formatVND(product.gia_ban)}đ
             </p>
             <p className="text-3xl font-bold text-red-500 mb-4">
               còn: {product.so_luong}

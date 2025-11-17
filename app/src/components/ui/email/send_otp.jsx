@@ -142,7 +142,7 @@ export default function SendOtpPopup() {
               <LockOutlined className="text-4xl text-blue-600 mx-auto mb-2" />
               <h2 className="text-2xl font-bold">Nhập OTP</h2>
               <p className="text-sm text-gray-600 mt-1">
-                Mã đã được gửi đến số điện thoại của bạn
+                Mã đã được gửi đến Gmail của bạn
               </p>
             </div>
 
